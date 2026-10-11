@@ -2,7 +2,9 @@
 
 # AMIS - Agent Memory Interface Spec
 
-AMIS is a vendor-neutral specification for moving durable agent memory between tools while preserving meaning, scope, identity and source evidence.
+AMIS is a vendor-neutral specification for moving durable agent memory between harnesses while preserving meaning, scope, identity and source evidence.
+
+**Amis means "friends" in French.** We chose the name because we want different agent harnesses to work together. The AMIS format aims to make their memory compatible through a shared representation and adapters that translate to and from each harness's native format.
 
 **Status: draft 0.4.0.** The data schemas and interactive examples are executable design artifacts. Native adapter behavior and transport bindings still need independent conformance testing before a stable release.
 
