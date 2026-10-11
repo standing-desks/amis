@@ -1,0 +1,88 @@
+{
+  "format": "amis.bundle",
+  "version": "0.4.0",
+  "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+  "exported_at": "2026-10-11T03:00:00Z",
+  "producer": {
+    "name": "AMIS example producer",
+    "version": "0.4.0"
+  },
+  "required_features": [
+    "amis.scope.v1",
+    "amis.revision-graph.v1",
+    "amis.integrity.jcs-sha256.v1"
+  ],
+  "history": {
+    "coverage": "complete",
+    "missing_parents": []
+  },
+  "records": [
+    {
+      "id": "805b3b19-1266-4254-a5cc-2c4eb30428ec",
+      "revision": {
+        "id": "6ae0f995-ad8e-56e3-922f-ba414668f715",
+        "parents": [],
+        "created_at": "2026-10-11T03:00:00Z"
+      },
+      "created_at": "2026-10-11T03:00:00Z",
+      "title": "Focused validation",
+      "kind": "feedback",
+      "body": {
+        "format": "text/markdown",
+        "text": "For this project, run the focused checks for the changed component before broader validation."
+      },
+      "scope": {
+        "kind": "project",
+        "project_ref": "c8530199-86e3-42bf-b4dd-aa811700916a"
+      },
+      "status": "active",
+      "validity": {
+        "not_before": null,
+        "expires_at": null
+      },
+      "sources": [
+        {
+          "locator": "memory/feedback_validation.md",
+          "snapshot_ref": "5f04690831fbc163d5551eeb9f53dc9544df25dff3d604cc90c7a2a1ad958b28",
+          "observed_at": "2026-10-11T03:00:00Z",
+          "source_created_at": null,
+          "native_kind": "feedback",
+          "source_id": "claude:fixture-store:feedback-validation",
+          "provider": "claude_code"
+        }
+      ],
+      "derivation": {
+        "mode": "parsed",
+        "adapter": "example.claude-parser@0.4.0",
+        "inputs": []
+      },
+      "extensions": {},
+      "format": "amis.record",
+      "version": "0.4.0",
+      "provenance": {
+        "completeness": "complete",
+        "omissions": []
+      },
+      "integrity": {
+        "algorithm": "sha256",
+        "canonicalization": "jcs-rfc8785",
+        "digest": "32e0eaedc4c3e1e3244539e2195b6190f8dd67fb5fe54d2828ffcc58ee60a706"
+      }
+    }
+  ],
+  "snapshots": [
+    {
+      "sha256": "5f04690831fbc163d5551eeb9f53dc9544df25dff3d604cc90c7a2a1ad958b28",
+      "media_type": "text/markdown",
+      "text": "---\nname: Focused validation\ndescription: A confirmed testing preference\ntype: feedback\n---\n\nFor this project, run the focused checks for the changed component before broader validation.\n",
+      "byte_length": 187,
+      "availability": "included"
+    }
+  ],
+  "extensions": {},
+  "integrity": {
+    "algorithm": "sha256",
+    "canonicalization": "jcs-rfc8785",
+    "digest": "f1e946631c40c90610e82782a74b298ec0fc62aa8344e955539c1ebc862c084b"
+  }
+}

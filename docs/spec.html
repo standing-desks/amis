@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMIS 0.4.0 · Agent Memory Interface Spec</title><link rel="stylesheet" href="assets/styles.css"></head>
+<body><div class="wrap spec-document"><header class="top"><div class="wordmark"><span>⇄</span>AMIS</div><nav><a href="index.html">← Visual guide</a><a href="../SPEC.md">Markdown source</a></nav></header><main class="spec-content"><h1>AMIS — Agent Memory Interface Spec</h1>
+<p><strong>Version:</strong> 0.4.0 · <strong>Status:</strong> draft</p>
+<p>AMIS is an independent specification for portable agent memory and interoperable adapter behavior. This draft is not an adopted industry standard. Native adapters and transport bindings still require conformance testing.</p>
+<p>The terms MUST, MUST NOT, SHOULD and MAY express the proposed conformance requirements.</p>
+<h2>Independent core. Explicit receiver behavior.</h2>
+<p><strong>AMIS — Agent Memory Interface Spec</strong> is an independent, vendor-neutral draft. It defines portable memory semantics and interoperable adapter behavior. No product, operating system, database, SDK or transport is required. Codex and Claude Code are initial illustrative adapter profiles. This document does not claim industry adoption or acronym uniqueness.</p>
+<p>The portable core contains knowledge and its evidence. The adapter contract describes conversion and delivery. Local policy decides which records may be published to which bindings. Portable data MUST NOT supply that authority. A record marked <code>active</code> is a lifecycle claim, never authorization. A receiver may require human approval or apply an explicit local policy; the portable record cannot select that policy or grant itself trust.</p>
+<p>Start with a local library: collect → review → publish. Add portable packs using the same core, then optional continuous sync after recovery and reconciliation pass conformance. “Every harness has every memory” means tracked coverage for every approved, in-scope record and selected target. It cannot mean guaranteed model recall or universal native compatibility.</p>
+<p>Parsing changes representation deterministically. Semantic consolidation—combining claims, resolving contradictions or summarizing—creates a separately reviewed proposal with explicit inputs. Equal wording alone never proves equivalent scope, independent evidence or identical memory identity.</p>
+<h2>Records, declared evidence and history.</h2>
+<pre><code>{
+  &quot;format&quot;: &quot;amis.bundle&quot;,
+  &quot;version&quot;: &quot;0.4.0&quot;,
+  &quot;bundle_id&quot;: &quot;&lt;uuid&gt;&quot;,
+  &quot;exported_at&quot;: &quot;&lt;timestamp&gt;&quot;,
+  &quot;producer&quot;: { &quot;name&quot;: &quot;Example producer&quot;, &quot;version&quot;: &quot;&lt;implementation version&gt;&quot; },
+  &quot;required_features&quot;: [
+    &quot;amis.scope.v1&quot;,
+    &quot;amis.revision-graph.v1&quot;,
+    &quot;amis.integrity.jcs-sha256.v1&quot;
+  ],
+  &quot;history&quot;: { &quot;coverage&quot;: &quot;complete&quot;, &quot;missing_parents&quot;: [] },
+  &quot;records&quot;: [ &quot;&lt;immutable revisions&gt;&quot; ],
+  &quot;snapshots&quot;: [ &quot;&lt;source descriptors and optional payloads&gt;&quot; ],
+  &quot;integrity&quot;: { &quot;algorithm&quot;: &quot;sha256&quot;, &quot;canonicalization&quot;: &quot;jcs-rfc8785&quot;, &quot;digest&quot;: &quot;&lt;hex&gt;&quot; }
+}
+</code></pre>
+<p>A <code>*.amis.json</code> manifest uses UTF-8 JSON and the existing <code>application/json</code> media type. The top-level format is <code>amis.bundle</code>; each record independently declares <code>format: amis.record</code> and <code>version: 0.4.0</code>, so its digest binds the interpretation as well as content. Schema files are distributed with the draft; this draft claims no registered URI namespace, media type or hosted schema endpoint. Small sources can be inline; larger packs use regular files under <code>sources/</code> next to the manifest. Compression, remote URL retrieval and streaming wire formats are outside the base draft. Readers MUST declare maximum document bytes, records, nesting depth, snapshots and total expanded bytes before ingest. Exceeding a limit is an explicit failure or incomplete scan, never silent truncation.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Record field</th>
+<th>Contract</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td>Stable memory UUID; never reassigned to another claim.</td>
+</tr>
+<tr>
+<td>revision</td>
+<td>Unique revision UUID, exact parents and creation time; immutable.</td>
+</tr>
+<tr>
+<td>title · kind · body</td>
+<td>Readable label, open category, plain text or Markdown. Active records require nonempty content. An authored record may have no external sources.</td>
+</tr>
+<tr>
+<td>scope</td>
+<td>Global, project, path, agent or unknown; logical identity is separate from local paths.</td>
+</tr>
+<tr>
+<td>status · validity</td>
+<td>Active/withdrawn, plus optional not-before and expiry bounds. Never a publication permission.</td>
+</tr>
+<tr>
+<td>provenance</td>
+<td>Complete, partial or unknown derivation inventory; explicit omissions without invented origin.</td>
+</tr>
+<tr>
+<td>sources</td>
+<td>Opaque source identity, provider, logical locator, optional snapshot reference, observation and nullable native dates.</td>
+</tr>
+<tr>
+<td>derivation</td>
+<td>Authored, verbatim, parsed, human edited or model proposed; versioned adapter and exact input revision references.</td>
+</tr>
+<tr>
+<td>integrity</td>
+<td>Canonical record digest covering meaning, scope, history, evidence and unknown data.</td>
+</tr>
+<tr>
+<td>extensions</td>
+<td>Optional namespaced additions; unknown fields at every object level are retained.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Evidence availability is explicit. A source may have <code>snapshot_ref: null</code> when no digest was recorded; never fabricate one. A known snapshot declares a SHA-256 reference, media type, nullable byte length and <code>availability</code>: included, withheld, erased or unavailable. Included snapshots require a non-null byte length and exactly one payload: <code>text</code>, canonical padded RFC 4648 <code>base64</code>, or a relative <code>path</code>. Other availability states MUST carry no payload. Unknown length is null, not zero. Availability describes the evidence supplied; an erased descriptor is not proof that every historical or remote copy was destroyed. Every non-null source reference resolves to a descriptor, even when its bytes are absent.</p>
+<p>Text hashes decoded UTF-8 bytes with no BOM removal, newline conversion or Unicode normalization. Use base64 or a file for bytes that cannot be represented as valid Unicode. Included payload length and hash MUST match. Snapshot digests are unique in a bundle. UTF-8 byte selectors must be in bounds and end on character boundaries; a selector cannot be certified while its bytes are unavailable. A valid record hash does not prove missing source bytes were verified.</p>
+<p><code>provenance.completeness</code> is complete, partial or unknown. It describes the recorded derivation inventory, not whether all source payloads travel with this pack. Record known omissions and their reasons. Complete source inventories may reference deliberately withheld bytes. An authored record can have an empty source list; an imported record with unknown origin must disclose that gap. A receiver decides whether evidence is adequate for publication and reports that decision. Transporting a different availability descriptor changes the bundle digest; changing a record’s provenance changes its revision. Source locators and metadata also need disclosure review because withholding a body does not remove them.</p>
+<p>File payloads MUST remain within the pack root, under <code>sources/</code>, using slash-separated relative components. Reject empty, dot, dot-dot, absolute, drive, NUL and backslash paths; reject symlink traversal and non-regular files. Resolve and read using directory-relative, no-follow operations so validation itself is not subject to path replacement races. No external links are fetched automatically. Source locators are descriptive identifiers, never executable paths or write destinations.</p>
+<p>Preserve qualifiers and links. Relative links need source context: an adapter must report whether it resolves, packages, rebases or blocks them. Unsupported attachments and native metadata stay in source snapshots with a fidelity report. Whole transcripts, skills, instructions and settings are not automatically durable memories; scan them as their native type and require explicit extraction policy.</p>
+<h2>Model a graph, not a counter.</h2>
+<p>Each record has a memory UUID and a distinct revision UUID. UUIDs MUST use lowercase hexadecimal in the hyphenated 8-4-4-4-12 representation; reject noncanonical casing rather than normalizing it after hashing. Use collision-resistant UUID generation; identifiers MUST NOT be derived only from text or wall-clock time. Each parent reference is <code>{memory_id, revision_id, digest}</code>. Parent revisions belong to the same memory. A genesis revision has no parents; an accepted edit references its base. A reviewed merge references all resolved heads. Same revision ID with different data is an identity conflict, never an overwrite.</p>
+<p>Different memories combined into a new claim get a new memory ID, with exact inputs in <code>derivation.inputs</code>. Those references may cross memory IDs. The lineage graph across parent and derivation edges MUST be acyclic and cannot reference itself. Accepting a same-memory edit retains original <code>created_at</code>. Revision and source times describe observations; clock skew MUST NOT select a conflict winner.</p>
+<p>A bundle may contain several revisions of one memory, but never duplicate revision IDs. <code>history.coverage=complete</code> requires every parent and derivation input to be resolvable within the bundle. A partial pack lists the exact unresolved references in <code>missing_parents</code>, including derivation inputs. Recipients may fill those gaps from verified local history. Missing ancestry is retained explicitly; it blocks publication and reconciliation that depend on unresolved history. The known graph must still be cycle-free. Unknown hidden ancestry cannot be certified.</p>
+<p>Several active heads require review; “newest timestamp wins” is forbidden. A known withdrawal holds automatic publication for that identity, including incoming branches based on older history. A deliberate restoration creates an explicitly reviewed active revision referencing all current heads, including withdrawals. Native disappearance alone does not create a tombstone.</p>
+<p>Validity is independent of history. Null bounds mean unspecified. When both exist, <code>not_before &lt; expires_at</code>; applicability uses <code>not_before ≤ now &lt; expires_at</code>. An expired or future record remains readable but is ineligible for new publication. Expiry schedules tracked removal or correction of existing owned projections. Renewal creates a reviewed revision; it does not rewrite history. A detector that cannot establish a credible current time holds time-bound publication.</p>
+<h2>Hash the whole meaning-bearing record.</h2>
+<p>The required baseline uses the <a href="https://www.rfc-editor.org/rfc/rfc8785">JSON Canonicalization Scheme, RFC 8785</a> and SHA-256. For a record digest, remove only that record’s top-level <code>integrity</code> member, canonicalize the remaining JSON and hash the UTF-8 bytes. Unknown fields and nested members named “integrity” remain included. Bundle, plan and receipt digests follow the same top-level rule; a bundle digest includes its records’ integrity objects.</p>
+<p>Readers MUST reject duplicate JSON member names, non-finite numbers, malformed UTF-8 and unpaired surrogates before materialization. Integer values must fit the interoperable range ±(2^53 − 1); higher precision belongs in declared strings. Apply the <a href="https://www.rfc-editor.org/rfc/rfc7493">I-JSON interoperability constraints</a> and the schema’s asserted UUID/date-time formats. Do not normalize string content before hashing. Object order and insignificant JSON whitespace do not change the digest; string whitespace does.</p>
+<p>Integrity proves consistency, not authorship, truth or authorization. An attacker can recompute an unsigned digest. Newly imported content remains untrusted evidence requiring local policy and review. Source prose cannot change adapters, grant permissions or override scope by instruction. Publishing memory intentionally introduces model context, so exact content is part of the review surface.</p>
+<p>Reader sequence: enforce byte limits and strict parsing → select a supported format version → validate structure with format assertions → verify canonical digests → resolve snapshots and references → evaluate semantics, compatibility and local policy. Schema validation alone is insufficient. Do not fetch schemas or extension code from imported identifiers.</p>
+<h2>Preserve what you do not understand. Hold what you cannot honor.</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Reader behavior</th>
+<th>Publication</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Supported exact 0.x version + understood features</td>
+<td>Validate and import.</td>
+<td>Apply normal scope/review gates.</td>
+</tr>
+<tr>
+<td>Unknown draft or major version</td>
+<td>Retain opaque original bytes with a limit-bounded error.</td>
+<td>Blocked until explicit migration or support.</td>
+</tr>
+<tr>
+<td>Unknown required feature</td>
+<td>Archive without interpreting the unsupported semantics.</td>
+<td>Blocked.</td>
+</tr>
+<tr>
+<td>Unknown optional field or extension</td>
+<td>Preserve it exactly as JSON data; include it in integrity.</td>
+<td>Allowed only when it cannot affect the known meaning or behavior.</td>
+</tr>
+<tr>
+<td>Future stable 1.x policy</td>
+<td>Patch clarifies; minor adds optional compatible capability; major breaks semantics.</td>
+<td>Required feature negotiation still applies.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every 0.x version is explicit and may break compatibility; accepting a previous draft by relabeling it 0.4.0 is forbidden. Migration retains original bytes, creates a validated new representation and records derivation; digest or semantic changes require new revisions and publication review. The future 1.x policy is a commitment to adopt before stability, not a compatibility promise for today’s drafts. The prior application-specific 0.3.0 draft is not wire-compatible: namespace, record envelope, scope and publication descriptors changed. Migration must preserve original identifiers as source references and must never reuse a revision ID for changed data.</p>
+<p>Required features are namespaced, versioned identifiers. The initial three cover scope, revision graphs and canonical integrity. An extension that alters interpretation, identity, retention, scope or publication MUST declare a required feature; “optional” cannot hide behavioral requirements. Unknown kinds or scopes are preservable but not publishable by an adapter that cannot represent them. Local policy can be stricter.</p>
+<p>Maintain a public, versioned specification registry of feature identifiers, kinds, error codes and conformance vectors with a change log and maintainer review. Reserve <code>amis.*</code> tokens for this draft’s core and feature registry; third parties use reverse-domain names. Readers MUST carry unknown values through import/export without dropping them or creating a revision. If an edit cannot safely preserve a field’s meaning, hold the edit. Exclude embeddings, transport, signatures, encryption and distributed consensus from the base; define separate reviewed profiles if needed.</p>
+<h2>A storage directory is not a scope guarantee.</h2>
+<p>Project, user and agent identities resolve through confirmed local bindings outside portable bundles. Project names, repository URLs and matching folder names may suggest a binding but cannot establish one. Worktrees may map to the same logical repository only by explicit local configuration. A changed binding invalidates approval. Path scope uses repository-relative components and explicit <code>exact</code> or <code>subtree</code> matching, with no implicit globbing or platform case folding; an adapter unable to preserve the semantics holds publication.</p>
+<p>A project may be a repository, workspace or another collection; the local binding supplies that meaning. The current coding adapter proposal initially supports known global and project scope (mapped to repositories). Unknown, path and agent scope are held unless a tested capability matches exactly. Scope describes intended applicability and loading, not a security boundary or guaranteed model obedience. Labeling globally loaded text “for repository X” does not create repository loading isolation.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Target route</th>
+<th>Eligible candidate</th>
+<th>Required evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Codex native memory</td>
+<td>Global record, detected compatible active ad-hoc backend.</td>
+<td>Supported write layout, global binding, accepted note, consolidation and loading observations as advertised.</td>
+</tr>
+<tr>
+<td>Codex context</td>
+<td>Mapped repository or user instruction route.</td>
+<td>Effective AGENTS.md discovery, overrides, intended working directory and configured byte budget.</td>
+</tr>
+<tr>
+<td>Claude native auto memory</td>
+<td>Repository record and meaning-compatible native kind.</td>
+<td>Effective memory directory, topic file, owned index entry, index budget and topic loading distinction.</td>
+</tr>
+<tr>
+<td>Claude context</td>
+<td>Explicitly selected CLAUDE.md import at matching scope.</td>
+<td>Import resolution, instruction precedence, configured budget and fresh-context evidence.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Native candidates come from <a href="https://code.claude.com/docs/en/memory">Claude’s documented memory behavior</a>, <a href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">Codex instruction discovery</a>, and a <a href="https://github.com/openai/codex/blob/0ada5d8806cdad498230d5b1b2924091e04c8feb/codex-rs/ext/memories/src/local/ad_hoc_note.rs">pinned Codex ad-hoc implementation</a>. They are not stable cross-harness import APIs. Claude’s index limit is 200 lines or 25KB; topic bodies load on demand. Preserve remaining budget for existing content and apply the detected target’s actual limits.</p>
+<p>Adapters MUST advertise tested versions and effective configuration fingerprints. Unknown write layouts fail closed; read support may independently retain opaque snapshots. Do not modify generated Codex summaries or its SQLite stores. For live database reads, use private database/WAL snapshots and no migrations. Source discovery may be broader than supported write destinations.</p>
+<h2>Six operations, with explicit failure modes.</h2>
+<p>The operation contract is independent of language and transport. A binding may use local calls, a CLI or an authenticated service; no particular binding is mandatory. The visual operation payloads are illustrative excerpts, not a finished RPC wire schema. Bundle, capability, plan and receipt schemas define data shape; these behavioral rules complete the proposed contract.</p>
+<ol>
+<li><strong>Describe:</strong> return adapter/version, supported draft versions, required features, readable formats, kinds/scopes/routes, limits, tested harness versions, configuration fingerprint, write coordination and observable loading levels.</li>
+<li><strong>Scan:</strong> return a pinned inventory generation, bounded pages and resumable cursors, source fingerprints and coverage errors. Cursor expiry or source mutation requires rescan; an interrupted or stale inventory never implies deletion.</li>
+<li><strong>Normalize:</strong> snapshot before parsing, reuse a verified local source identity or owned receipt, preserve exact provenance, classify uncertain semantics and return candidates. Unknown source creation dates remain null. No implicit summarization or authorization. Sources without recoverable bytes use the explicit provenance-gap representation.</li>
+<li><strong>Plan:</strong> resolve scope and current heads, check validity, compatibility, owned base bytes, target budget and write coordination. Freeze explicit before/after resource states (present with verified snapshots, or absent for creation/removal), expected head references, binding/configuration digests, fidelity by JSON pointer, blockers and an expiry. Output a sealed local plan.</li>
+<li><strong>Apply:</strong> require an unexpired local approval of that plan digest. Recheck current heads, policy, bindings, configuration and resource preconditions. Journal before mutation; apply per-target writes through declared coordination and preserve partial outcomes.</li>
+<li><strong>Verify:</strong> inspect exact resulting bytes and route-specific evidence. Report write, availability and withdrawal independently, with observation time, output references and explicit limits. Return changed/missing/conflicting outputs for reconciliation.</li>
+</ol>
+<p>Minimum stable error families: <code>unsupported_version</code>, <code>unsupported_feature</code>, <code>invalid_integrity</code>, <code>history_incomplete</code>, <code>identity_conflict</code>, <code>scope_unresolved</code>, <code>unsupported_projection</code>, <code>budget_exceeded</code>, <code>stale_plan</code>, <code>write_conflict</code> and <code>verification_unavailable</code>. Each outcome includes a retry policy: never, after review, after rescan or same plan. Do not retry permission/configuration/semantic failures as transient I/O.</p>
+<p>A fidelity report accounts for every record field: verbatim, mapped, retained locally, blocked or explicitly approved omission. Content, identity continuity and scope cannot be silently omitted. Reports and resource diffs are both part of approval. Local approval stores decision ID, actor/policy, plan digest and decision/expiry time separately; importing a plan or a receipt never recreates it.</p>
+<h2>Per-target recovery, without pretending files are transactions.</h2>
+<p>Persist immutable intent, approval linkage and exact before/after snapshots before any mutation. Bind the idempotency key to the receiver instance, target binding and immutable plan digest and retain the resulting receipt across restarts. A completed output that still matches becomes a no-op on retry. One failed target must not rewrite successful targets. Multi-file and multi-harness changes are not globally atomic.</p>
+<p>Each adapter declares <code>versioned_api</code> (real conditional version checks), <code>cooperative_lock</code> (all writers honor the same lock), or <code>quiescent_required</code> (writers must be stopped or excluded during apply). Atomic rename provides per-file replacement, <strong>not compare-and-swap against arbitrary external writers</strong>. Pre/post hashes alone cannot eliminate the race. Where safe coordination cannot be established, hold shared mutable writes and disable unattended synchronization for that route. Never imply a lock protects against a writer that ignores it.</p>
+<p>With coordination held, verify preconditions, write temporary files on the destination volume, preserve required metadata, flush according to the supported platform’s durability contract, replace atomically and journal each completed step. Revalidate path containment without following symlinks. Preserve unrelated user content and record exact managed sections. Pre-create topic content before adding its index reference; remove the reference before removing its owned topic. Choose route-specific ordering that keeps partial states recoverable.</p>
+<p>After a crash, compare each destination with both before and after snapshots. Exact after means that step is applied; exact before permits replay under renewed checks; anything else is a conflict. Do not roll back over intervening user edits. Retry a partial plan only if its approval and all remaining preconditions still hold; otherwise create a replacement plan that accounts for successful steps.</p>
+<p>Receipts have independent dimensions: <code>write_state</code> (pending/partial/complete/conflict/failed), <code>availability</code> (unknown/unavailable/discoverable/loaded), and <code>withdrawal</code> (not requested/pending/verified). Evidence names observed bytes, index presence, consolidation, fresh-context loading or withdrawal, with timestamps and exact output hashes. Missing evidence cannot be upgraded by inference. “Loaded” means observed in the declared context, not future recall, compliance or loading of every indexed topic.</p>
+<p>Evidence becomes stale after output, configuration or harness-version change, or the local policy’s evidence deadline. Keep historical receipts but show current availability as unverified until refreshed. Native execution for verification follows the application’s normal execution controls; merely saving a file must never trigger an undisclosed paid model run.</p>
+<h2>Keep the base. Preserve the competing claim.</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Observation</th>
+<th>Required result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Owned receipt + identical projection</td>
+<td>No new memory, revision or independent evidence.</td>
+</tr>
+<tr>
+<td>Native changed; canonical unchanged</td>
+<td>Propose a reviewed revision from the exported base.</td>
+</tr>
+<tr>
+<td>Canonical changed; native unchanged</td>
+<td>Plan the newly approved projection.</td>
+</tr>
+<tr>
+<td>Both changed</td>
+<td>Retain base and both edits; resolve explicit branches.</td>
+</tr>
+<tr>
+<td>Marker with no owned receipt</td>
+<td>Untrusted identity hint; no automatic overwrite or deduplication.</td>
+</tr>
+<tr>
+<td>Missing file, renamed file or regenerated summary</td>
+<td>Require continuity evidence; do not infer withdrawal.</td>
+</tr>
+<tr>
+<td>Withdrawn identity reappears</td>
+<td>Suppress resurrection and retain the withdrawal obligation.</td>
+</tr>
+</tbody>
+</table></div>
+<p>A source registry ties opaque source IDs to observed native objects and snapshots. File paths alone are not stable identity. A marker is meaningful only alongside an owned receipt, exact output/base bytes and a confirmed binding. Content similarity may flag a possible echo for review, but cannot invent independent corroboration. A foreign receipt is archival evidence, never local ownership.</p>
+<p>Withdrawal appends a revision with a reason and at least one parent. Its body and source payloads may be omitted. Queue removal or correction of owned projections; native derived summaries and already-running contexts may persist. Track those limitations and pending corrections explicitly. Changes to shared files still require valid plans and write coordination.</p>
+<p>Withdrawal and erasure are different operations. Local erasure may remove sensitive body/source/history payloads subject to the chosen retention policy, while retaining a minimal suppression ledger of identity and digests to prevent accidental resurrection. Those identifiers can themselves be sensitive and need an explicit retention policy. If the user erases that ledger too, explain that old imports can no longer be recognized. Partial history records the missing ancestors; no claim of remote erasure is possible without target evidence.</p>
+<h2>Keep capabilities separate from the portable core.</h2>
+<p><strong>Core:</strong> record/bundle identity, scope, lifecycle, validity, provenance, revision graph, strict JSON and canonical integrity. A core reader can archive and inspect knowledge without possessing any native write capability. Core validation does not require a database, model, network endpoint or approval UI. A conforming exporter declares completeness and never implies that a selected export is a full backup.</p>
+<p><strong>Informational links — <code>amis.links.v1</code>:</strong> optional <code>links[]</code> entries carry a UUID, open relation identifier and target. A pinned target uses the exact memory/revision/digest reference; a current target uses <code>{memory_id, selection: "current"}</code>. Current resolution returns the eligible head set or an explicit conflict, never a timestamp-selected winner. A missing pinned version is missing or gone, never substituted with current content. Links may cycle; parent/derivation history may not. Links do not grant authority, withdraw another record, corroborate themselves or affect task readiness. Adding a link creates a new source revision and does not change the target. Any record with links requires the feature token at bundle level. Cross-store retrieval follows local access policy and must not automatically fetch targets.</p>
+<p><strong>Publication — <code>amis.publication.v1</code>:</strong> capability negotiation, exact plans, receiver-owned authorization, apply/recovery and evidence receipts. Target descriptors use open <code>provider</code> and versioned <code>profile</code> identifiers; Codex and Claude are examples, not an enum. Mutations name a binding-owned <code>resource_ref</code>; a file adapter resolves it to a safe local path, while a service adapter may resolve it to a conditional API object. No portable locator is automatically a write target. Unknown profiles cannot publish. Roles and evidence kinds are extensible, but unknown evidence cannot establish a known availability claim. Plans with blockers may contain zero mutations; an executable plan must have mutations and no blockers.</p>
+<p><strong>Synchronization — <code>amis.sync.v1</code>:</strong> publication plus incremental observation, explicit withdrawal and durable recovery. A continuation token binds the provider instance, source selection, visibility policy and inventory generation. It is opaque; expiry or incompatible reuse returns an explicit rescan requirement. A completed baseline plus ordered, durably checkpointed changes is required before declaring convergence. Withdrawal and erasure events are explicit; absence from a page, export, changed authorization scope or stale snapshot never means deletion. Receivers acknowledge only after durable acceptance; duplicate events are harmless by revision identity. Retention gaps invalidate cursors and require a fresh baseline with suppression state. No claim of distributed atomicity or universal convergence is made while either side has unresolved conflicts.</p>
+<p>The capability descriptor declares exact draft versions, feature IDs, profiles, supported operations, scope/kind sets, write coordination, verification levels and finite limits. An empty capability list means none, not a wildcard. Per-operation limits may be stricter and must be exposed before processing. Descriptors have a configuration digest, observation time, expiry and integrity proof; a stale descriptor invalidates a dependent plan. A descriptor is a provider claim, not certification or authentication. The descriptor schema is available as a separate artifact.</p>
+<h3>Common operation semantics</h3>
+<p>Each binding must carry an operation/request identity, exact protocol version, selected profile, deadline/cancellation context and either a result or structured error with a retry classification. A successful empty list is distinguishable from an unsupported operation. Unknown required operations fail explicitly; they never become successful no-ops. A read returns complete selected record content or an explicit incomplete/unavailable result, never silently truncated text. Multi-target results preserve each target’s outcome even when the overall operation is partial.</p>
+<p>Apply idempotency is scoped to receiver instance, target binding and immutable plan digest. Reuse of an idempotency key with a different plan is an error. Concurrent applications to the same binding must serialize or use the target’s conditional-write mechanism. After a timeout or cancellation, the outcome is unknown until the journal/receipt is inspected; a client must not assume rollback or start a different mutation blindly. Bindings must specify their own authentication and access control. An AMIS digest supplies neither.</p>
+<p>The six visual operation examples are not a finalized network protocol. Before a transport binding claims interoperability, it must publish typed request/result schemas, capability and error mappings, cancellation semantics and matching test vectors. The core and profile tokens in this draft are proposed contracts, not claims that any particular provider has implemented or certified them.</p>
+<h3>Governance and evolution</h3>
+<p>Keep the specification, schemas, extension registry, migration notes and conformance vectors in a vendor-neutral distribution. The registry defines each token’s owner, version, dependencies, semantics, required/optional status and compatibility behavior. No vendor receives a privileged semantic namespace. Third-party identifiers use a controlled reverse-domain prefix; core tokens are reserved by the draft. Do not execute extension code or fetch schemas based on imported text.</p>
+<p>Deprecation must identify a replacement, a compatibility interval and a loss-accounted migration. Numeric enums, implementation paths, database tables and model-specific embeddings are not core identities. A future integrity or encoding profile must explicitly negotiate its algorithm and interpretation; old readers archive unsupported semantics rather than reinterpret an existing digest. Keep SHA-256/JCS mandatory within this draft so independent implementations share a verifiable baseline.</p>
+<p>Future robustness comes from bounded contracts, version negotiation, transparent omissions and shared conformance tests. It does not promise that today’s draft can anticipate every provider. Semantic changes require explicit evolution; unknown data remains recoverable.</p>
+<h2>Stabilize through fixtures and independent readers.</h2>
+<p>Implement schemas, strict parsing/canonicalization, immutable history, source identity, receiver bindings and delivery journals independently of native adapters. Adapters own native layouts and capability checks. Applications choose their storage engine, user interface and deployment model. Storage may use a database or files; the portable contract remains independent of that choice.</p>
+<ol>
+<li><strong>Reader:</strong> strict JSON, schema with asserted formats, canonical hash vectors, snapshot bytes/lengths/paths/selectors, graph references/cycles, duplicate IDs, time bounds and unknown-field preservation. Include Unicode, CRLF, BOM, base64 and resource-limit fixtures.</li>
+<li><strong>Converter:</strong> both Codex → AMIS → Claude and reverse with expected bytes, native frontmatter escaping, retained qualifiers, kind/scope mismatch, overrides, worktrees, relative links and full fidelity accounting. Importing exported projections must not create new evidence.</li>
+<li><strong>Publisher:</strong> approval bound to digest/heads/bindings, expiry/configuration invalidation, actual write coordination, user-content preservation, index/context budgets, conditional creation and separate availability evidence. Run fresh-context loading tests in isolated harness homes with recorded versions.</li>
+<li><strong>Synchronizer:</strong> interrupt after every journal/write step, retry partial deliveries twice, race native edits, reorder scan pages, expire cursors, fork and merge revisions, restore withdrawn branches and change configuration. Test missing receipts and unknown required features.</li>
+</ol>
+<p>These are separate conformance claims. A valid reader is not a proven publisher; a publisher does not automatically qualify for unattended sync. The first product milestone supports the library with explicit import/publish and only tested routes. Packs reuse the same validator. Watchers come after recovery, and semantic consolidation remains an explicit review step.</p>
+<p>Before declaring 1.0, require two independent reader/canonicalization implementations to pass shared vectors, both native adapters to pass the isolated conversion/loading matrix, documented migration fixtures from supported drafts, and a reviewed extension/error registry. Publish the exact versions, capabilities and known omissions tested. Draft review and browser tests cannot establish native conformance.</p>
+<p><strong>Deliverable boundary:</strong> these documents, schemas and example demonstrate a proposed contract and inspectable design simulations. They do not implement native adapters or alter harness memory.</p></main></div></body></html>

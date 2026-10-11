@@ -1,0 +1,46 @@
+# AMIS — Agent Memory Interface Spec
+
+AMIS is a vendor-neutral specification for moving durable agent memory between tools while preserving meaning, scope, identity and source evidence.
+
+**Status: draft 0.4.0.** The data schemas and interactive examples are executable design artifacts. Native adapter behavior and transport bindings still need independent conformance testing before a stable release.
+
+```text
+Source memory → source adapter → AMIS record → target adapter → target memory
+                                   │
+                         History, scope, provenance
+                         and explicit delivery evidence
+```
+
+- [Specification](SPEC.md) — proposed normative behavior and compatibility rules.
+- [Visual guide](docs/index.html) — interactive conversion, conflict and profile examples; open locally in a browser.
+- [Schemas](schemas/0.4.0/) — bundles, publication plans, delivery receipts and capability descriptors.
+- [Example memory bundle](examples/project-feedback.amis.json) and [capability descriptor](examples/capabilities.json).
+- [Contributing](CONTRIBUTING.md) and [draft changes](CHANGELOG.md).
+
+## Design boundaries
+
+The core covers immutable record revisions, explicit scope, provenance, lifecycle and canonical integrity. It does not require a particular application, database, programming language, model or transport.
+
+Optional profiles add informational links, native publication and synchronization. Providers advertise capabilities; unknown required semantics prevent publication. Codex and Claude Code are initial illustrative adapter profiles, not dependencies or certified implementations.
+
+Receivers own authorization. A checksum establishes byte consistency, not authorship, truth or permission. Delivery evidence distinguishes written content, discoverability and observed loading.
+
+## Work on the draft
+
+Use Python 3.11+ and Node.js 22+:
+
+```sh
+python3 -m venv .venv
+.venv/bin/pip install -r requirements-dev.txt
+npm ci
+npx playwright install chromium
+make check
+```
+
+`make check` checks generated documentation, exercises the browser examples, validates all four schemas and verifies canonical hashes with an independent Python implementation. Reports and screenshots go to `test-results/`.
+
+Edit `SPEC.md` for normative text. Edit `docs/guide.template.html` and `docs/assets/` for the visual guide. Run `make docs` to rebuild the generated HTML, then `make check`. Tests are artifact checks, not proof of native harness integration.
+
+## Toward 1.0
+
+Stability requires shared conformance vectors, independent implementations, a reviewed extension registry, explicit draft migrations and tested native profiles. Breaking semantics require versioned changes; the draft does not promise unlimited forward compatibility.

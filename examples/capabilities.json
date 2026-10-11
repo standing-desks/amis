@@ -1,0 +1,54 @@
+{
+  "format": "amis.capabilities",
+  "version": "0.4.0",
+  "provider": "org.example.markdown",
+  "implementation": {
+    "name": "Example read adapter",
+    "version": "0.1.0"
+  },
+  "protocol_versions": [
+    "0.4.0"
+  ],
+  "features": [
+    "amis.scope.v1",
+    "amis.revision-graph.v1",
+    "amis.integrity.jcs-sha256.v1"
+  ],
+  "profiles": [
+    {
+      "id": "org.example.markdown.v1",
+      "version": "1.0.0",
+      "operations": [
+        "describe",
+        "scan",
+        "normalize"
+      ],
+      "scopes": [
+        "project",
+        "global"
+      ],
+      "kinds": [
+        "feedback",
+        "learning",
+        "user"
+      ],
+      "coordination": [],
+      "verification": []
+    }
+  ],
+  "limits": {
+    "max_document_bytes": 10485760,
+    "max_records": 1000,
+    "max_depth": 64,
+    "max_source_bytes": 1048576,
+    "max_total_source_bytes": 10485760
+  },
+  "configuration_digest": "5f04690831fbc163d5551eeb9f53dc9544df25dff3d604cc90c7a2a1ad958b28",
+  "observed_at": "2026-10-11T03:00:00Z",
+  "expires_at": "2026-11-01T00:00:00Z",
+  "integrity": {
+    "algorithm": "sha256",
+    "canonicalization": "jcs-rfc8785",
+    "digest": "a18401744a0bdeb57da1c0f12ea39b18b3396d9fbd177c121e8771f33a25b124"
+  }
+}

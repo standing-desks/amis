@@ -1,0 +1,704 @@
+[
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "805b3b19-1266-4254-a5cc-2c4eb30428ec",
+        "revision": {
+          "id": "94ad0ada-a766-5890-b5a7-7b6f2e32932a",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Focused validation",
+        "kind": "feedback",
+        "body": {
+          "format": "text/markdown",
+          "text": "For this project, run the focused checks for the changed component before broader validation."
+        },
+        "scope": {
+          "kind": "project",
+          "project_ref": "c8530199-86e3-42bf-b4dd-aa811700916a"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "claude:fixture-store:feedback",
+            "provider": "claude_code",
+            "locator": "memory/feedback.md",
+            "snapshot_ref": "8345d3d4035f555d38fd64d81b30d78567f0ec6e2525b863a2c0679948f2aa27",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": "feedback"
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "claude-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "9fea6bdd33f21741fcbeb7923f97072c615e634184ddcf53a182a293e0667e93"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "8345d3d4035f555d38fd64d81b30d78567f0ec6e2525b863a2c0679948f2aa27",
+        "byte_length": 176,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "---\nname: Focused validation\ndescription: Example source note\ntype: feedback\n---\n\nFor this project, run the focused checks for the changed component before broader validation.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "89002144e10834ed2160f7870e154b68390515ca41425af5a4978ff4758c3c91"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "f5c8d1bb-7ae1-4e47-9071-758907ac73c1",
+        "revision": {
+          "id": "72b60ff9-6ee8-5d51-bcbb-54b2f21e6b39",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Native text offsets",
+        "kind": "learning",
+        "body": {
+          "format": "text/markdown",
+          "text": "For this project, preserve UTF-16 offsets when translating native editor text ranges."
+        },
+        "scope": {
+          "kind": "project",
+          "project_ref": "c8530199-86e3-42bf-b4dd-aa811700916a"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "claude:fixture-store:lesson",
+            "provider": "claude_code",
+            "locator": "memory/lesson.md",
+            "snapshot_ref": "5d5932cbbb8644c3642bd21c6ca8d7c9e4969be3bd2251cdfa5fbf27c91e341a",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": null
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "claude-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "13cf8b920161d287b8c178a22957ead3445cb3e38fe8b8973f83da345013267f"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "5d5932cbbb8644c3642bd21c6ca8d7c9e4969be3bd2251cdfa5fbf27c91e341a",
+        "byte_length": 154,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "---\nname: Native text offsets\ndescription: Example source note\n---\n\nFor this project, preserve UTF-16 offsets when translating native editor text ranges.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "0c9376b6d7d18bbd9a84c26f6eb28d302a900720b6569908b612041802a819d8"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "2cbe4e5b-f7c9-4e8a-a595-bbcaa84f94d9",
+        "revision": {
+          "id": "122d5c48-a6b1-5490-bfc2-5e741ed71653",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Response preference",
+        "kind": "user",
+        "body": {
+          "format": "text/markdown",
+          "text": "I prefer concise responses with concrete examples across my projects."
+        },
+        "scope": {
+          "kind": "global",
+          "subject_ref": "user:local-owner"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "claude:fixture-store:global",
+            "provider": "claude_code",
+            "locator": "memory/global.md",
+            "snapshot_ref": "e45283cfefa63953218fa069dd01b0f5601fcf6b6542260aabf31370e6ac3e59",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": "user"
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "claude-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "ec51ceed9713fe51904667138a087cd97416d2a7b6afe854179215f12197455b"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "e45283cfefa63953218fa069dd01b0f5601fcf6b6542260aabf31370e6ac3e59",
+        "byte_length": 149,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "---\nname: Response preference\ndescription: Example source note\ntype: user\n---\n\nI prefer concise responses with concrete examples across my projects.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "176763ef774583defc283bb5b20f223ce44d76f82efdb4a608b007fff2eada4d"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "915f3c25-f859-45b5-8e1f-d917187542ab",
+        "revision": {
+          "id": "6e1faf76-c08a-5c5e-ab2d-a9a090f00d45",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Validation note",
+        "kind": "feedback",
+        "body": {
+          "format": "text/markdown",
+          "text": "Run focused checks before broad validation."
+        },
+        "scope": {
+          "kind": "unknown"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "claude:fixture-store:unknown",
+            "provider": "claude_code",
+            "locator": "memory/unknown.md",
+            "snapshot_ref": "fd1e393b50a13db95b67c7690436421175e53e8e5e65cc13d16328b5b3c61f9c",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": "feedback"
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "claude-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "742b0cb796fc441534d48c6d8c486e1355eb26165d9a4916ad451d80621e6af0"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "fd1e393b50a13db95b67c7690436421175e53e8e5e65cc13d16328b5b3c61f9c",
+        "byte_length": 123,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "---\nname: Validation note\ndescription: Example source note\ntype: feedback\n---\n\nRun focused checks before broad validation.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "a82a1aa001a75bc2909f4fd2ce56c4a781df3611c3bebd657427b1db6e8c5b33"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "805b3b19-1266-4254-a5cc-2c4eb30428ec",
+        "revision": {
+          "id": "83859060-6fbc-57fa-8406-2e23babb413b",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Focused validation",
+        "kind": "feedback",
+        "body": {
+          "format": "text/markdown",
+          "text": "For this project, run the focused checks for the changed component before broader validation."
+        },
+        "scope": {
+          "kind": "project",
+          "project_ref": "c8530199-86e3-42bf-b4dd-aa811700916a"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "codex:fixture-store:feedback",
+            "provider": "codex",
+            "locator": "memories/MEMORY.md · Focused validation",
+            "snapshot_ref": "ab8d70c6cde7b40e66f641d32caf24d36b4b2dcbf66648dbd886f0c29367de98",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": null
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "codex-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "3ffefffa0eef0587dc9cd1ac240763b00daab4c2ff1fd6a7a44eb3f454f1e594"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "ab8d70c6cde7b40e66f641d32caf24d36b4b2dcbf66648dbd886f0c29367de98",
+        "byte_length": 116,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "# Focused validation\n\nFor this project, run the focused checks for the changed component before broader validation.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "766731efbf2a5299553ff03017a270101395b2bee02b0b63b7e9eadefd256719"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "f5c8d1bb-7ae1-4e47-9071-758907ac73c1",
+        "revision": {
+          "id": "fc269d80-9989-5922-bdf2-c4a3798ef740",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Native text offsets",
+        "kind": "learning",
+        "body": {
+          "format": "text/markdown",
+          "text": "For this project, preserve UTF-16 offsets when translating native editor text ranges."
+        },
+        "scope": {
+          "kind": "project",
+          "project_ref": "c8530199-86e3-42bf-b4dd-aa811700916a"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "codex:fixture-store:lesson",
+            "provider": "codex",
+            "locator": "memories/MEMORY.md · Native text offsets",
+            "snapshot_ref": "33b67473d6387e06d746f862f76c1b0262613c290e664e423357340e0301a134",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": null
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "codex-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "cad43a8def9583c430069d44fb4282da894f82e0fca397a57b6c23be46b0cb3d"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "33b67473d6387e06d746f862f76c1b0262613c290e664e423357340e0301a134",
+        "byte_length": 109,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "# Native text offsets\n\nFor this project, preserve UTF-16 offsets when translating native editor text ranges.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "d9eac30eb6656000f6050b01dc07123f01fa0f9a93889b9dfcc5209753426477"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "2cbe4e5b-f7c9-4e8a-a595-bbcaa84f94d9",
+        "revision": {
+          "id": "aaf6bf0d-4b12-51e6-b69d-75964d16d26d",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Response preference",
+        "kind": "user",
+        "body": {
+          "format": "text/markdown",
+          "text": "I prefer concise responses with concrete examples across my projects."
+        },
+        "scope": {
+          "kind": "global",
+          "subject_ref": "user:local-owner"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "codex:fixture-store:global",
+            "provider": "codex",
+            "locator": "memories/MEMORY.md · Response preference",
+            "snapshot_ref": "b3d288b69ea51dea4c5fa414b5bb19c5403c96973173a3807ac836a012084e49",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": null
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "codex-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "1b3beaa15e37c798946114eb9fdb9ff0eb06763f34b3d1d94c738d6bd75496dc"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "b3d288b69ea51dea4c5fa414b5bb19c5403c96973173a3807ac836a012084e49",
+        "byte_length": 93,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "# Response preference\n\nI prefer concise responses with concrete examples across my projects.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "a3f92dc146bb17e39c425b02691c91a056c69acc8bac9b01a4e0dfc70d0bbad7"
+    }
+  },
+  {
+    "format": "amis.bundle",
+    "version": "0.4.0",
+    "bundle_id": "c6d539ff-3902-5b04-9c97-648a99120506",
+    "exported_at": "2026-10-11T03:00:00Z",
+    "producer": {
+      "name": "AMIS example producer",
+      "version": "0.4.0"
+    },
+    "required_features": [
+      "amis.scope.v1",
+      "amis.revision-graph.v1",
+      "amis.integrity.jcs-sha256.v1"
+    ],
+    "history": {
+      "coverage": "complete",
+      "missing_parents": []
+    },
+    "records": [
+      {
+        "id": "915f3c25-f859-45b5-8e1f-d917187542ab",
+        "revision": {
+          "id": "c613ab57-87c5-5fa2-9b6e-d1bf77696d10",
+          "parents": [],
+          "created_at": "2026-10-11T03:00:00Z"
+        },
+        "created_at": "2026-10-11T03:00:00Z",
+        "title": "Validation note",
+        "kind": "feedback",
+        "body": {
+          "format": "text/markdown",
+          "text": "Run focused checks before broad validation."
+        },
+        "scope": {
+          "kind": "unknown"
+        },
+        "status": "active",
+        "validity": {
+          "not_before": null,
+          "expires_at": null
+        },
+        "sources": [
+          {
+            "source_id": "codex:fixture-store:unknown",
+            "provider": "codex",
+            "locator": "memories/MEMORY.md · Validation note",
+            "snapshot_ref": "599d10becdc9ab878267359755f9215cae9918a1a19bd7db26ffc50b401ab858",
+            "observed_at": "2026-10-11T03:00:00Z",
+            "source_created_at": null,
+            "native_kind": null
+          }
+        ],
+        "derivation": {
+          "mode": "parsed",
+          "adapter": "codex-fixture@0.4.0",
+          "inputs": []
+        },
+        "extensions": {},
+        "format": "amis.record",
+        "version": "0.4.0",
+        "provenance": {
+          "completeness": "complete",
+          "omissions": []
+        },
+        "integrity": {
+          "algorithm": "sha256",
+          "canonicalization": "jcs-rfc8785",
+          "digest": "c6bdf23731c0c9f8cef28301980dd3416a9afadab6f43004f5e0cd87cb048833"
+        }
+      }
+    ],
+    "snapshots": [
+      {
+        "sha256": "599d10becdc9ab878267359755f9215cae9918a1a19bd7db26ffc50b401ab858",
+        "byte_length": 63,
+        "media_type": "text/markdown",
+        "availability": "included",
+        "text": "# Validation note\n\nRun focused checks before broad validation.\n"
+      }
+    ],
+    "extensions": {},
+    "integrity": {
+      "algorithm": "sha256",
+      "canonicalization": "jcs-rfc8785",
+      "digest": "245ead98578447eb5a154ffac4a6f55e45b4c42c2eef7ff309110a2a20557d1a"
+    }
+  }
+]

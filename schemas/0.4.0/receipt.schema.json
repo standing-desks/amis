@@ -1,0 +1,259 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AMIS 0.4.0 delivery receipt",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "amis.receipt"
+    },
+    "version": {
+      "const": "0.4.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "plan_id": {
+      "type": "string",
+      "minLength": 1,
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "plan_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "record": {
+      "$ref": "#/$defs/revision_ref"
+    },
+    "target_binding_id": {
+      "type": "string",
+      "minLength": 1,
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "observed_at": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "write_state": {
+      "enum": [
+        "pending",
+        "partial",
+        "complete",
+        "conflict",
+        "failed"
+      ]
+    },
+    "availability": {
+      "enum": [
+        "unknown",
+        "unavailable",
+        "discoverable",
+        "loaded"
+      ]
+    },
+    "withdrawal": {
+      "enum": [
+        "not_requested",
+        "pending",
+        "verified"
+      ]
+    },
+    "outputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "enum": [
+              "present",
+              "absent"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "base_snapshot_ref": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resource_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "resource_ref",
+          "state",
+          "role"
+        ],
+        "additionalProperties": true,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "state": {
+                  "const": "present"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "sha256"
+              ]
+            },
+            "else": {
+              "not": {
+                "required": [
+                  "sha256"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observed_at": {
+            "type": "string",
+            "minLength": 1,
+            "format": "date-time"
+          },
+          "output_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "minItems": 1
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "kind",
+          "observed_at",
+          "output_refs",
+          "detail"
+        ],
+        "additionalProperties": true
+      }
+    },
+    "last_error": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retry": {
+          "enum": [
+            "never",
+            "after_review",
+            "after_rescan",
+            "same_plan"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "code",
+        "retry",
+        "detail"
+      ],
+      "additionalProperties": true
+    },
+    "integrity": {
+      "$ref": "#/$defs/integrity"
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "id",
+    "plan_id",
+    "plan_digest",
+    "record",
+    "target_binding_id",
+    "observed_at",
+    "write_state",
+    "availability",
+    "withdrawal",
+    "outputs",
+    "evidence",
+    "integrity"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "revision_ref": {
+      "type": "object",
+      "properties": {
+        "memory_id": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "memory_id",
+        "revision_id",
+        "digest"
+      ],
+      "additionalProperties": true
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "jcs-rfc8785"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "digest"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

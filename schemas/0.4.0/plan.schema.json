@@ -1,0 +1,349 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AMIS 0.4.0 publication plan",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "amis.plan"
+    },
+    "version": {
+      "const": "0.4.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "format": "uuid",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "record": {
+      "$ref": "#/$defs/revision_ref"
+    },
+    "expected_heads": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/revision_ref"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "target": {
+      "type": "object",
+      "properties": {
+        "binding_id": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "binding_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities_digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "provider": {
+          "type": "string",
+          "minLength": 1
+        },
+        "profile": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "provider",
+        "profile",
+        "binding_id",
+        "binding_digest",
+        "adapter",
+        "capabilities_digest"
+      ],
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "coordination": {
+      "enum": [
+        "versioned_api",
+        "cooperative_lock",
+        "quiescent_required"
+      ]
+    },
+    "fidelity": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "pointer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "outcome": {
+            "enum": [
+              "verbatim",
+              "mapped",
+              "sidecar",
+              "omitted",
+              "blocked"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "pointer",
+          "outcome",
+          "detail"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 1
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "integrity": {
+      "$ref": "#/$defs/integrity"
+    },
+    "mutations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "enum": [
+                  "absent",
+                  "present"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "snapshot_ref": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "state"
+            ],
+            "additionalProperties": true,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "state": {
+                      "const": "present"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "sha256",
+                    "snapshot_ref"
+                  ]
+                },
+                "else": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "sha256"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "snapshot_ref"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "after": {
+            "type": "object",
+            "properties": {
+              "state": {
+                "enum": [
+                  "absent",
+                  "present"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "snapshot_ref": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "state"
+            ],
+            "additionalProperties": true,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "state": {
+                      "const": "present"
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "sha256",
+                    "snapshot_ref"
+                  ]
+                },
+                "else": {
+                  "not": {
+                    "anyOf": [
+                      {
+                        "required": [
+                          "sha256"
+                        ]
+                      },
+                      {
+                        "required": [
+                          "snapshot_ref"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "role": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resource_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "resource_ref",
+          "before",
+          "after",
+          "role"
+        ],
+        "additionalProperties": true
+      },
+      "minItems": 0
+    }
+  },
+  "required": [
+    "format",
+    "version",
+    "id",
+    "record",
+    "expected_heads",
+    "target",
+    "created_at",
+    "expires_at",
+    "coordination",
+    "mutations",
+    "fidelity",
+    "blockers",
+    "integrity"
+  ],
+  "additionalProperties": true,
+  "$defs": {
+    "revision_ref": {
+      "type": "object",
+      "properties": {
+        "memory_id": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revision_id": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uuid",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "memory_id",
+        "revision_id",
+        "digest"
+      ],
+      "additionalProperties": true
+    },
+    "integrity": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "const": "sha256"
+        },
+        "canonicalization": {
+          "const": "jcs-rfc8785"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "algorithm",
+        "canonicalization",
+        "digest"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "blockers": {
+            "maxItems": 0
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "mutations": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}
