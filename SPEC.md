@@ -1,15 +1,15 @@
 # AMIS - Agent Memory Interface Spec
 
-**Version:** 0.4.0 · **Status:** draft
+**Version:** 0.4.0
 
-AMIS is an independent specification for portable agent memory and interoperable adapter behavior. This draft is not an adopted industry standard. Native adapters and transport bindings still require conformance testing.
+AMIS is an independent specification for portable agent memory and interoperable adapter behavior. AMIS is not an adopted industry standard. Native adapters and transport bindings still require conformance testing.
 
 The terms MUST, MUST NOT, SHOULD and MAY express the proposed conformance requirements.
 
 
 ## Independent core. Explicit receiver behavior.
 
-**AMIS - Agent Memory Interface Spec** is an independent, vendor-neutral draft. It defines portable memory semantics and interoperable adapter behavior. No product, operating system, database, SDK or transport is required. Codex and Claude Code are initial illustrative adapter profiles. This document does not claim industry adoption or acronym uniqueness.
+**AMIS - Agent Memory Interface Spec** is an independent, vendor-neutral specification. It defines portable memory semantics and interoperable adapter behavior. No product, operating system, database, SDK or transport is required. Codex and Claude Code are initial illustrative adapter profiles. This document does not claim industry adoption or acronym uniqueness.
 
 The portable core contains knowledge and its evidence. The adapter contract describes conversion and delivery. Local policy decides which records may be published to which bindings. Portable data MUST NOT supply that authority. A record marked `active` is a lifecycle claim, never authorization. A receiver may require human approval or apply an explicit local policy; the portable record cannot select that policy or grant itself trust.
 
@@ -38,7 +38,7 @@ Parsing changes representation deterministically. Semantic consolidation (combin
 }
 ```
 
-A `*.amis.json` manifest uses UTF-8 JSON and the existing `application/json` media type. The top-level format is `amis.bundle`; each record independently declares `format: amis.record` and `version: 0.4.0`, so its digest binds the interpretation as well as content. Schema files are distributed with the draft; this draft claims no registered URI namespace, media type or hosted schema endpoint. Small sources can be inline; larger packs use regular files under `sources/` next to the manifest. Compression, remote URL retrieval and streaming wire formats are outside the base draft. Readers MUST declare maximum document bytes, records, nesting depth, snapshots and total expanded bytes before ingest. Exceeding a limit is an explicit failure or incomplete scan, never silent truncation.
+A `*.amis.json` manifest uses UTF-8 JSON and the existing `application/json` media type. The top-level format is `amis.bundle`; each record independently declares `format: amis.record` and `version: 0.4.0`, so its digest binds the interpretation as well as content. Schema files are distributed with the specification; AMIS claims no registered URI namespace, media type or hosted schema endpoint. Small sources can be inline; larger packs use regular files under `sources/` next to the manifest. Compression, remote URL retrieval and streaming wire formats are outside the base specification. Readers MUST declare maximum document bytes, records, nesting depth, snapshots and total expanded bytes before ingest. Exceeding a limit is an explicit failure or incomplete scan, never silent truncation.
 
 | Record field | Contract |
 | --- | --- |
@@ -90,16 +90,16 @@ Reader sequence: enforce byte limits and strict parsing → select a supported f
 | Input | Reader behavior | Publication |
 | --- | --- | --- |
 | Supported exact 0.x version + understood features | Validate and import. | Apply normal scope/review gates. |
-| Unknown draft or major version | Retain opaque original bytes with a limit-bounded error. | Blocked until explicit migration or support. |
+| Unknown 0.x or major version | Retain opaque original bytes with a limit-bounded error. | Blocked until explicit migration or support. |
 | Unknown required feature | Archive without interpreting the unsupported semantics. | Blocked. |
 | Unknown optional field or extension | Preserve it exactly as JSON data; include it in integrity. | Allowed only when it cannot affect the known meaning or behavior. |
 | Future stable 1.x policy | Patch clarifies; minor adds optional compatible capability; major breaks semantics. | Required feature negotiation still applies. |
 
-Every 0.x version is explicit and may break compatibility; accepting a previous draft by relabeling it 0.4.0 is forbidden. Migration retains original bytes, creates a validated new representation and records derivation; digest or semantic changes require new revisions and publication review. The future 1.x policy is a commitment to adopt before stability, not a compatibility promise for today’s drafts. The prior application-specific 0.3.0 draft is not wire-compatible: namespace, record envelope, scope and publication descriptors changed. Migration must preserve original identifiers as source references and must never reuse a revision ID for changed data.
+Every 0.x version is explicit and may break compatibility; accepting a previous version by relabeling it 0.4.0 is forbidden. Migration retains original bytes, creates a validated new representation and records derivation; digest or semantic changes require new revisions and publication review. The future 1.x policy is a commitment to adopt before stability, not a compatibility promise for current 0.x versions. The prior application-specific 0.3.0 design is not wire-compatible: namespace, record envelope, scope and publication descriptors changed. Migration must preserve original identifiers as source references and must never reuse a revision ID for changed data.
 
 Required features are namespaced, versioned identifiers. The initial three cover scope, revision graphs and canonical integrity. An extension that alters interpretation, identity, retention, scope or publication MUST declare a required feature; “optional” cannot hide behavioral requirements. Unknown kinds or scopes are preservable but not publishable by an adapter that cannot represent them. Local policy can be stricter.
 
-Maintain a public, versioned specification registry of feature identifiers, kinds, error codes and conformance vectors with a change log and maintainer review. Reserve `amis.*` tokens for this draft’s core and feature registry; third parties use reverse-domain names. Readers MUST carry unknown values through import/export without dropping them or creating a revision. If an edit cannot safely preserve a field’s meaning, hold the edit. Exclude embeddings, transport, signatures, encryption and distributed consensus from the base; define separate reviewed profiles if needed.
+Maintain a public, versioned specification registry of feature identifiers, kinds, error codes and conformance vectors with a change log and maintainer review. Reserve `amis.*` tokens for the specification’s core and feature registry; third parties use reverse-domain names. Readers MUST carry unknown values through import/export without dropping them or creating a revision. If an edit cannot safely preserve a field’s meaning, hold the edit. Exclude embeddings, transport, signatures, encryption and distributed consensus from the base; define separate reviewed profiles if needed.
 
 ## A storage directory is not a scope guarantee.
 
@@ -122,7 +122,7 @@ Adapters MUST advertise tested versions and effective configuration fingerprints
 
 The operation contract is independent of language and transport. A binding may use local calls, a CLI or an authenticated service; no particular binding is mandatory. The visual operation payloads are illustrative excerpts, not a finished RPC wire schema. Bundle, capability, plan and receipt schemas define data shape; these behavioral rules complete the proposed contract.
 
-1. **Describe:** return adapter/version, supported draft versions, required features, readable formats, kinds/scopes/routes, limits, tested harness versions, configuration fingerprint, write coordination and observable loading levels.
+1. **Describe:** return adapter/version, supported AMIS versions, required features, readable formats, kinds/scopes/routes, limits, tested harness versions, configuration fingerprint, write coordination and observable loading levels.
 2. **Scan:** return a pinned inventory generation, bounded pages and resumable cursors, source fingerprints and coverage errors. Cursor expiry or source mutation requires rescan; an interrupted or stale inventory never implies deletion.
 3. **Normalize:** snapshot before parsing, reuse a verified local source identity or owned receipt, preserve exact provenance, classify uncertain semantics and return candidates. Unknown source creation dates remain null. No implicit summarization or authorization. Sources without recoverable bytes use the explicit provenance-gap representation.
 4. **Plan:** resolve scope and current heads, check validity, compatibility, owned base bytes, target budget and write coordination. Freeze explicit before/after resource states (present with verified snapshots, or absent for creation/removal), expected head references, binding/configuration digests, fidelity by JSON pointer, blockers and an expiry. Output a sealed local plan.
@@ -175,7 +175,7 @@ Withdrawal and erasure are different operations. Local erasure may remove sensit
 
 **Synchronization - `amis.sync.v1`:** publication plus incremental observation, explicit withdrawal and durable recovery. A continuation token binds the provider instance, source selection, visibility policy and inventory generation. It is opaque; expiry or incompatible reuse returns an explicit rescan requirement. A completed baseline plus ordered, durably checkpointed changes is required before declaring convergence. Withdrawal and erasure events are explicit; absence from a page, export, changed authorization scope or stale snapshot never means deletion. Receivers acknowledge only after durable acceptance; duplicate events are harmless by revision identity. Retention gaps invalidate cursors and require a fresh baseline with suppression state. No claim of distributed atomicity or universal convergence is made while either side has unresolved conflicts.
 
-The capability descriptor declares exact draft versions, feature IDs, profiles, supported operations, scope/kind sets, write coordination, verification levels and finite limits. An empty capability list means none, not a wildcard. Per-operation limits may be stricter and must be exposed before processing. Descriptors have a configuration digest, observation time, expiry and integrity proof; a stale descriptor invalidates a dependent plan. A descriptor is a provider claim, not certification or authentication. The descriptor schema is available as a separate artifact.
+The capability descriptor declares exact AMIS versions, feature IDs, profiles, supported operations, scope/kind sets, write coordination, verification levels and finite limits. An empty capability list means none, not a wildcard. Per-operation limits may be stricter and must be exposed before processing. Descriptors have a configuration digest, observation time, expiry and integrity proof; a stale descriptor invalidates a dependent plan. A descriptor is a provider claim, not certification or authentication. The descriptor schema is available as a separate artifact.
 
 ### Common operation semantics
 
@@ -183,15 +183,15 @@ Each binding must carry an operation/request identity, exact protocol version, s
 
 Apply idempotency is scoped to receiver instance, target binding and immutable plan digest. Reuse of an idempotency key with a different plan is an error. Concurrent applications to the same binding must serialize or use the target’s conditional-write mechanism. After a timeout or cancellation, the outcome is unknown until the journal/receipt is inspected; a client must not assume rollback or start a different mutation blindly. Bindings must specify their own authentication and access control. An AMIS digest supplies neither.
 
-The six visual operation examples are not a finalized network protocol. Before a transport binding claims interoperability, it must publish typed request/result schemas, capability and error mappings, cancellation semantics and matching test vectors. The core and profile tokens in this draft are proposed contracts, not claims that any particular provider has implemented or certified them.
+The six visual operation examples are not a finalized network protocol. Before a transport binding claims interoperability, it must publish typed request/result schemas, capability and error mappings, cancellation semantics and matching test vectors. The core and profile tokens in this specification are proposed contracts, not claims that any particular provider has implemented or certified them.
 
 ### Governance and evolution
 
-Keep the specification, schemas, extension registry, migration notes and conformance vectors in a vendor-neutral distribution. The registry defines each token’s owner, version, dependencies, semantics, required/optional status and compatibility behavior. No vendor receives a privileged semantic namespace. Third-party identifiers use a controlled reverse-domain prefix; core tokens are reserved by the draft. Do not execute extension code or fetch schemas based on imported text.
+Keep the specification, schemas, extension registry, migration notes and conformance vectors in a vendor-neutral distribution. The registry defines each token’s owner, version, dependencies, semantics, required/optional status and compatibility behavior. No vendor receives a privileged semantic namespace. Third-party identifiers use a controlled reverse-domain prefix; core tokens are reserved by the specification. Do not execute extension code or fetch schemas based on imported text.
 
-Deprecation must identify a replacement, a compatibility interval and a loss-accounted migration. Numeric enums, implementation paths, database tables and model-specific embeddings are not core identities. A future integrity or encoding profile must explicitly negotiate its algorithm and interpretation; old readers archive unsupported semantics rather than reinterpret an existing digest. Keep SHA-256/JCS mandatory within this draft so independent implementations share a verifiable baseline.
+Deprecation must identify a replacement, a compatibility interval and a loss-accounted migration. Numeric enums, implementation paths, database tables and model-specific embeddings are not core identities. A future integrity or encoding profile must explicitly negotiate its algorithm and interpretation; old readers archive unsupported semantics rather than reinterpret an existing digest. Keep SHA-256/JCS mandatory within this version so independent implementations share a verifiable baseline.
 
-Future robustness comes from bounded contracts, version negotiation, transparent omissions and shared conformance tests. It does not promise that today’s draft can anticipate every provider. Semantic changes require explicit evolution; unknown data remains recoverable.
+Future robustness comes from bounded contracts, version negotiation, transparent omissions and shared conformance tests. It does not promise that the current specification can anticipate every provider. Semantic changes require explicit evolution; unknown data remains recoverable.
 
 ## Stabilize through fixtures and independent readers.
 
@@ -204,6 +204,6 @@ Implement schemas, strict parsing/canonicalization, immutable history, source id
 
 These are separate conformance claims. A valid reader is not a proven publisher; a publisher does not automatically qualify for unattended sync. The first product milestone supports the library with explicit import/publish and only tested routes. Packs reuse the same validator. Watchers come after recovery, and semantic consolidation remains an explicit review step.
 
-Before declaring 1.0, require two independent reader/canonicalization implementations to pass shared vectors, both native adapters to pass the isolated conversion/loading matrix, documented migration fixtures from supported drafts, and a reviewed extension/error registry. Publish the exact versions, capabilities and known omissions tested. Draft review and browser tests cannot establish native conformance.
+Before declaring 1.0, require two independent reader/canonicalization implementations to pass shared vectors, both native adapters to pass the isolated conversion/loading matrix, documented migration fixtures from supported versions, and a reviewed extension/error registry. Publish the exact versions, capabilities and known omissions tested. Specification review and browser tests cannot establish native conformance.
 
 **Deliverable boundary:** these documents, schemas and example demonstrate a proposed contract and inspectable design simulations. They do not implement native adapters or alter harness memory.

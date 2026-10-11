@@ -9,8 +9,8 @@ Propose changes with:
 3. Compatibility, migration, resource limits and failure behavior.
 4. Schema/example updates and meaningful positive and negative conformance vectors.
 
-`SPEC.md` is the normative draft. Schemas constrain structure; behavioral validation is also necessary. Visual demonstrations are informative and must not imply that native adapters have been implemented or certified.
+`SPEC.md` is the normative specification. Schemas constrain structure; behavioral validation is also necessary. Visual demonstrations are informative and must not imply that native adapters have been implemented or certified.
 
 Preserve unknown optional data. Unknown required semantics must fail explicitly or remain opaque archival data. Never reuse a revision identity for changed record data, infer semantic deletion from an incomplete export, or treat a portable record as authorization.
 
-Use `make docs` after editing specification or guide sources, and `make check` before submitting a change. Record user-visible contract changes in `CHANGELOG.md`. The 0.x series allows breaking changes only through an explicit new draft and migration notes.
+Use `make docs` after editing specification or guide sources, and `make check` before submitting a change. Record user-visible contract changes in `CHANGELOG.md`. The 0.x series allows breaking changes only through an explicit new version and migration notes.

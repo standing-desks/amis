@@ -1,4 +1,4 @@
-"""Build the informative HTML views from the canonical draft and example."""
+"""Build the informative HTML views from the canonical specification and example."""
 from pathlib import Path
 import argparse
 import base64

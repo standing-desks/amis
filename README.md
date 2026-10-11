@@ -6,7 +6,7 @@ AMIS is a vendor-neutral specification for moving durable agent memory between h
 
 **Amis means "friends" in French.** We chose the name because we want different agent harnesses to work together. The AMIS format aims to make their memory compatible through a shared representation and adapters that translate to and from each harness's native format.
 
-**Status: draft 0.4.0.** The data schemas and interactive examples are executable design artifacts. Native adapter behavior and transport bindings still need independent conformance testing before a stable release.
+**Version: 0.4.0.** The data schemas and interactive examples are executable design artifacts. Native adapter behavior and transport bindings still need independent conformance testing before a stable release.
 
 ```text
 Source memory → source adapter → AMIS record → target adapter → target memory
@@ -20,18 +20,18 @@ Source memory → source adapter → AMIS record → target adapter → target m
 - [Schemas](schemas/0.4.0/) - bundles, publication plans, delivery receipts and capability descriptors.
 - [Example memory bundle](examples/project-feedback.amis.json) and [capability descriptor](examples/capabilities.json).
 - [Visual identity](docs/brand.html) and [SVG assets](docs/assets/brand/).
-- [Contributing](CONTRIBUTING.md) and [draft changes](CHANGELOG.md).
+- [Contributing](CONTRIBUTING.md) and [changelog](CHANGELOG.md).
 
 ## Harness support and roadmap
 
-**Supported draft formats** means AMIS has documented profiles and [tested offline conversion fixtures](tests/fixtures/conversions/README.md). Native loading, publication and synchronization still need adapter conformance testing. **Upcoming** means a planned AMIS profile whose implementation and validation are still to come.
+**Supported formats** means AMIS has documented profiles and [tested offline conversion fixtures](tests/fixtures/conversions/README.md). Native loading, publication and synchronization still need adapter conformance testing. **Upcoming** means a planned AMIS profile whose implementation and validation are still to come.
 
 The table covers current format support and additional harnesses on the roadmap. Links point to each harness's own memory or instruction documentation; the listed files are the existing formats an AMIS adapter would need to handle.
 
 | Harness | AMIS status | Memory or instruction formats |
 | --- | --- | --- |
-| [Codex](https://learn.chatgpt.com/docs/agent-configuration/agents-md) | Supported draft formats | Selected Markdown memory snapshots, candidate ad-hoc notes and `AGENTS.md` context. |
-| [Claude Code](https://code.claude.com/docs/en/memory) | Supported draft formats | Topic Markdown, `MEMORY.md` index entries and `CLAUDE.md` imports. |
+| [Codex](https://learn.chatgpt.com/docs/agent-configuration/agents-md) | Supported formats | Selected Markdown memory snapshots, candidate ad-hoc notes and `AGENTS.md` context. |
+| [Claude Code](https://code.claude.com/docs/en/memory) | Supported formats | Topic Markdown, `MEMORY.md` index entries and `CLAUDE.md` imports. |
 | [Pi](https://github.com/earendil-works/pi/tree/main/packages/coding-agent#context-files) | Upcoming | `AGENTS.md` and `CLAUDE.md` context files. |
 | [Oh My Pi (OMP)](https://github.com/can1357/oh-my-pi/blob/main/docs/config-usage.md) | Upcoming | `AGENTS.md`, `.omp/AGENTS.md` and rules files. |
 | [OpenCode](https://docs.opencode.ai/docs/rules/) | Upcoming | `AGENTS.md` and configured instruction files. |
@@ -63,7 +63,7 @@ Optional profiles add informational links, native publication and synchronizatio
 
 Receivers own authorization. A checksum establishes byte consistency, not authorship, truth or permission. Delivery evidence distinguishes written content, discoverability and observed loading.
 
-## Work on the draft
+## Work on the specification
 
 Use Python 3.11+ and Node.js 22+:
 
@@ -83,9 +83,9 @@ Edit `SPEC.md` for normative text. Edit `docs/guide.template.html` and `docs/ass
 
 `make check-conversions` runs four golden conversions and escaping, byte preservation, identity and scope checks. The [fixture guide](tests/fixtures/conversions/README.md) describes the tested input and output formats. The browser uses the same offline renderer. Native loading and safe publication still require adapter integration tests.
 
-## Consume a pinned draft
+## Consume a pinned version
 
-Pin an exact repository commit, including `schemas/`, when using these draft artifacts.
+Pin an exact repository commit, including `schemas/`, when using these specification artifacts.
 The importable [Python API](amis_contract.py) provides `loads`, `seal`, `digest`,
 `record_reference`, `validate_bundle` and `validate_document`. Add the checkout root
 to Python's module path and install `requirements-dev.txt`. Importing the API does
@@ -96,7 +96,7 @@ not run tests or generate reports. Validation remains active under `python -O`.
 or capability descriptor. Invalid inputs raise exceptions. Callers must enforce
 input limits and retain receiver-owned authorization and publication policy.
 External snapshot files are not resolved by this offline checker. These checks
-cover the tested draft behaviors, not all normative requirements of the spec.
+cover the tested specification behaviors, not all normative requirements of the spec.
 
 The dependency also provides the pure CommonJS/browser renderer at
 `docs/assets/projections.js`: `render(record, {target, route})` returns proposed
@@ -105,4 +105,4 @@ files or a blocked route. Validate the bundle before rendering and hold
 
 ## Toward 1.0
 
-Stability requires shared conformance vectors, independent implementations, a reviewed extension registry, explicit draft migrations and tested native profiles. Breaking semantics require versioned changes; the draft does not promise unlimited forward compatibility.
+Stability requires shared conformance vectors, independent implementations, a reviewed extension registry, explicit version migrations and tested native profiles. Breaking semantics require versioned changes; the specification does not promise unlimited forward compatibility.

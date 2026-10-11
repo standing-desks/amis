@@ -67,12 +67,12 @@ linked=copy.deepcopy(example);linked['required_features'].append('amis.links.v1'
 linked['required_features'].remove('amis.links.v1');rejects('links must declare required semantics',lambda:validate(seal(linked)))
 linked['required_features'].append('amis.links.v1');linked['records'][0]['links'][0]['target']['revision_id']=newid();linked['records'][0]=seal(linked['records'][0]);rejects('mixed pinned and current target',lambda:validate(seal(linked)))
 linked['records'][0]['links'][0]['target']=rr(B);linked['records'][0]=seal(linked['records'][0]);validate(seal(linked));checks.append('pinned informational reference may be unresolved')
-wrong=copy.deepcopy(example);wrong['records'][0]['version']='0.5.0';wrong['records'][0]=seal(wrong['records'][0]);rejects('record version cannot drift from negotiated draft',lambda:validate(seal(wrong)))
+wrong=copy.deepcopy(example);wrong['records'][0]['version']='0.5.0';wrong['records'][0]=seal(wrong['records'][0]);rejects('record version cannot drift from negotiated version',lambda:validate(seal(wrong)))
 cap=seal({'format':'amis.capabilities','version':'0.4.0','provider':'org.example.markdown','implementation':{'name':'Example read adapter','version':'0.1.0'},'protocol_versions':['0.4.0'],'features':['amis.scope.v1','amis.revision-graph.v1','amis.integrity.jcs-sha256.v1'],'profiles':[{'id':'org.example.markdown.v1','version':'1.0.0','operations':['describe','scan','normalize'],'scopes':['project','global'],'kinds':['feedback','learning','user'],'coordination':[],'verification':[]}],'limits':{'max_document_bytes':10485760,'max_records':1000,'max_depth':64,'max_source_bytes':1048576,'max_total_source_bytes':10485760},'configuration_digest':sha,'observed_at':now,'expires_at':'2026-11-01T00:00:00Z'})
 validators['capabilities'].validate(cap);checks.append('read-only capability descriptor')
 checked_cap=json.loads((EXAMPLES/'capabilities.json').read_text())
 validators['capabilities'].validate(checked_cap)
 assert digest(checked_cap)==checked_cap['integrity']['digest'],'capability integrity'
-result={'result':'PASS','schemas':len(schemas),'bundles_with_independent_JCS_hashes':len(fixtures)+1,'behavioral_and_negative_checks':len(checks),'checks':checks,'scope':'Draft artifact validation; no native adapter or service conformance claimed.'}
+result={'result':'PASS','schemas':len(schemas),'bundles_with_independent_JCS_hashes':len(fixtures)+1,'behavioral_and_negative_checks':len(checks),'checks':checks,'scope':'AMIS artifact validation; no native adapter or service conformance claimed.'}
 (ARTIFACTS/'contract-report.json').write_text(json.dumps(result,indent=2)+'\n')
 print(json.dumps(result,indent=2))

@@ -1,4 +1,4 @@
-"""Offline AMIS 0.4.0 draft checks. Importing this module never runs tests or writes files.
+"""Offline AMIS 0.4.0 contract checks. Importing this module never runs tests or writes files.
 
 This is a repository API, not a native adapter or a complete conformance implementation.
 Pin the repository revision together with its schemas. Only inline source snapshots
@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 
 
 class ContractError(ValueError):
-    """A draft artifact failed a semantic or integrity check."""
+    """An AMIS artifact failed a semantic or integrity check."""
 
 
 def _require(condition, message):

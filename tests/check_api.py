@@ -1,4 +1,4 @@
-"""Consumer checks for the importable draft API, including optimized Python."""
+"""Consumer checks for the importable AMIS API, including optimized Python."""
 import copy
 import json
 import os

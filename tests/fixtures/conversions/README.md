@@ -1,6 +1,6 @@
 # Conversion format fixtures
 
-These synthetic inputs test the draft format examples, not a live agent or general native-memory parser. There are no personal memories in this fixture set.
+These synthetic inputs test the format examples, not a live agent or general native-memory parser. There are no personal memories in this fixture set.
 
 | Fixture | Source | Target resources |
 | --- | --- | --- |
