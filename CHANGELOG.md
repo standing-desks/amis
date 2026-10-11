@@ -1,8 +1,15 @@
 # Draft changes
 
-## 0.4.0 — Initial independent draft
+## Draft updates
 
-- Name the specification AMIS — Agent Memory Interface Spec.
+- Remove em and en dashes from authored content and record the writing preference.
+- Add the woven AMIS SVG logo, favicon, dark variant and eight interface icons.
+- Share the offline projection renderer with the visual guide and test exact files in both Codex/Claude directions.
+- Split Claude topics from index/import resources and quote frontmatter scalars safely.
+
+## 0.4.0 - Initial independent draft
+
+- Name the specification AMIS - Agent Memory Interface Spec.
 - Define neutral `amis.bundle` and `amis.record` identifiers, with record versions covered by integrity hashes.
 - Separate the portable core from optional links, publication and synchronization profiles.
 - Replace closed provider lists and filesystem-only mutation targets with open provider/profile identifiers and bound resource references.

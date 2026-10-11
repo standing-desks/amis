@@ -1,4 +1,6 @@
-# AMIS — Agent Memory Interface Spec
+<p><picture><source media="(prefers-color-scheme: dark)" srcset="docs/assets/brand/amis-logo-on-dark.svg"><img src="docs/assets/brand/amis-logo.svg" alt="AMIS, Agent Memory Interface Spec" width="440"></picture></p>
+
+# AMIS - Agent Memory Interface Spec
 
 AMIS is a vendor-neutral specification for moving durable agent memory between tools while preserving meaning, scope, identity and source evidence.
 
@@ -11,10 +13,11 @@ Source memory → source adapter → AMIS record → target adapter → target m
                          and explicit delivery evidence
 ```
 
-- [Specification](SPEC.md) — proposed normative behavior and compatibility rules.
-- [Visual guide](docs/index.html) — interactive conversion, conflict and profile examples; open locally in a browser.
-- [Schemas](schemas/0.4.0/) — bundles, publication plans, delivery receipts and capability descriptors.
+- [Specification](SPEC.md) - proposed normative behavior and compatibility rules.
+- [Visual guide](docs/index.html) - interactive conversion, conflict and profile examples; open locally in a browser.
+- [Schemas](schemas/0.4.0/) - bundles, publication plans, delivery receipts and capability descriptors.
 - [Example memory bundle](examples/project-feedback.amis.json) and [capability descriptor](examples/capabilities.json).
+- [Visual identity](docs/brand.html) and [SVG assets](docs/assets/brand/).
 - [Contributing](CONTRIBUTING.md) and [draft changes](CHANGELOG.md).
 
 ## Design boundaries
@@ -37,9 +40,13 @@ npx playwright install chromium
 make check
 ```
 
-`make check` checks generated documentation, exercises the browser examples, validates all four schemas and verifies canonical hashes with an independent Python implementation. Reports and screenshots go to `test-results/`.
+`make check` checks generated documentation, exercises the browser examples, checks exact Codex/Claude projection files in both directions, validates all four schemas and verifies canonical hashes with an independent Python implementation. Reports and screenshots go to `test-results/`.
 
 Edit `SPEC.md` for normative text. Edit `docs/guide.template.html` and `docs/assets/` for the visual guide. Run `make docs` to rebuild the generated HTML, then `make check`. Tests are artifact checks, not proof of native harness integration.
+
+## Conversion format fixtures
+
+`make check-conversions` runs four golden conversions and escaping, byte preservation, identity and scope checks. The [fixture guide](tests/fixtures/conversions/README.md) describes the tested input and output formats. The browser uses the same offline renderer. Native loading and safe publication still require adapter integration tests.
 
 ## Toward 1.0
 

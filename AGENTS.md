@@ -10,3 +10,5 @@ This repository defines Agent Memory Interface Spec, an independent draft for po
 - Do not claim native integration, independent implementation conformance or industry adoption based on browser/schema checks.
 - Run `make docs` and `make check` for contract or documentation changes. Update `CHANGELOG.md` when the draft contract changes.
 - Keep dependency changes intentional and retain lockfiles. Do not add implementation-specific dependencies to the portable format.
+
+- Do not use em dashes (U+2014) or en dashes (U+2013) in authored prose. Use commas, colons, parentheses, ordinary hyphens, or separate sentences. Preserve exact imported source bytes.

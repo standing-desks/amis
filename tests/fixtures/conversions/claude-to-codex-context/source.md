@@ -1,0 +1,7 @@
+---
+name: Focused validation
+description: Example source note
+type: feedback
+---
+
+For this project, run the focused checks for the changed component before broader validation.

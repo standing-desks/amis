@@ -53,12 +53,14 @@ const dir=path.resolve(__dirname,'../docs');const artifacts=path.resolve(__dirna
   for(const view of ['flow','mapping','roundtrip']){await page.locator('[data-view="'+view+'"]').click();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,width+' '+view);assert.equal(await page.locator('.lab').evaluate(e=>e.scrollWidth>e.clientWidth+1),false,'lab overflow')}
  }
  await page.locator('[data-view="flow"]').click();await page.locator('#playground').screenshot({path:artifacts+'/amis-0.4-mobile.png'});
- for(const file of ['index.html','spec.html']){
+ for(const file of ['index.html','spec.html','brand.html']){
   await page.goto('file://'+dir+'/'+file);
+  await page.waitForFunction(()=>Array.from(document.images).every(img=>img.complete&&img.naturalWidth>0));
+  if(file==='brand.html'){await page.setViewportSize({width:1200,height:1100});await page.screenshot({path:artifacts+'/amis-brand.png'});await page.setViewportSize({width:390,height:950});}
   const links=await page.locator('a[href]').evaluateAll(a=>a.map(x=>x.getAttribute('href')));
   for(const link of links){if(link.startsWith('#'))assert.ok(await page.locator(link).count());else if(!link.startsWith('http'))assert.ok(fs.existsSync(path.resolve(dir,link.split('#')[0])),link)}
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false,'document overflow '+file);
 
  }
- assert.deepEqual(errors,[]);await browser.close();console.log(JSON.stringify({result:'PASS',browser_errors:errors,fixture_documents:docs.length,route_outcomes:routeChecks,designs:3,roundtrip_states:5,profiles:4,failure_cases:6,responsive_widths:[1480,1024,768,390],screenshots:11},null,2));
+ assert.deepEqual(errors,[]);await browser.close();console.log(JSON.stringify({result:'PASS',browser_errors:errors,fixture_documents:docs.length,route_outcomes:routeChecks,designs:3,roundtrip_states:5,profiles:4,failure_cases:6,responsive_widths:[1480,1024,768,390],screenshots:12},null,2));
 })().catch(e=>{console.error(e);process.exit(1)});

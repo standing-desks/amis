@@ -1,6 +1,7 @@
 """Build the informative HTML views from the canonical draft and example."""
 from pathlib import Path
 import argparse
+import base64
 import re
 import sys
 
@@ -18,9 +19,14 @@ def outputs():
     content = re.sub(r'href="(?!https?:|#)([^"]+)"', lambda m: 'href="../' + m[1] + '"', content)
     content = content.replace('<table>', '<div class="table-wrap"><table>').replace('</table>', '</table></div>')
     spec = '''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMIS 0.4.0 · Agent Memory Interface Spec</title><link rel="stylesheet" href="assets/styles.css"></head>
-<body><div class="wrap spec-document"><header class="top"><div class="wordmark"><span>⇄</span>AMIS</div><nav><a href="index.html">← Visual guide</a><a href="../SPEC.md">Markdown source</a></nav></header><main class="spec-content">''' + content + '</main></div></body></html>\n'
-    return {ROOT / 'docs/index.html': guide, ROOT / 'docs/spec.html': spec}
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AMIS 0.4.0 · Agent Memory Interface Spec</title><link rel="icon" type="image/svg+xml" href="assets/brand/amis-mark.svg"><link rel="stylesheet" href="assets/styles.css"><link rel="stylesheet" href="assets/icons.css"></head>
+<body><div class="wrap spec-document"><header class="top"><div class="wordmark"><img class="brand-mark" src="assets/brand/amis-mark.svg" alt="">AMIS</div><nav><a href="index.html">← Visual guide</a><a href="../SPEC.md">Markdown source</a></nav></header><main class="spec-content">''' + content + '</main></div></body></html>\n'
+    # Inline masks work when the guide is opened via file:// as well as HTTP.
+    icons = '/* Generated from assets/icons/*.svg. */\n'
+    for path in sorted((ROOT / 'docs/assets/icons').glob('*.svg')):
+        uri = 'data:image/svg+xml;base64,' + base64.b64encode(path.read_bytes()).decode('ascii')
+        icons += '.icon-' + path.stem + '{mask-image:url("' + uri + '");-webkit-mask-image:url("' + uri + '")}\n'
+    return {ROOT / 'docs/index.html': guide, ROOT / 'docs/spec.html': spec, ROOT / 'docs/assets/icons.css': icons}
 
 
 def main():

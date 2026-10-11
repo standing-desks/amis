@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="104" viewBox="0 0 440 104" role="img" aria-labelledby="title desc">
+<title id="title">AMIS, Agent Memory Interface Spec</title>
+<desc id="desc">Woven cyan and pink strands with a green leaf, next to the AMIS name.</desc>
+<g transform="translate(4 4)"><rect width="96" height="96" rx="23" fill="#202326"/>
+  <g fill="none" stroke-width="9" stroke-linecap="round">
+    <path d="M27 73C27 51 69 48 69 26" stroke="#62eaff"/>
+    <path d="M69 73C69 51 27 48 27 26" stroke="#202326" stroke-width="15"/>
+    <path d="M69 73C69 51 27 48 27 26" stroke="#ff4fd8"/>
+    <path d="M27 73C27 63 35 57 45 51" stroke="#62eaff"/>
+  </g>
+  <path d="M45 30C43 20 49 13 60 12C60 22 55 29 45 30Z" fill="#b9ff5b"/>
+  <path d="M45 30L60 12C60 22 55 29 45 30Z" fill="#8cce42"/>
+  <rect x="40" y="75" width="16" height="4" rx="2" fill="#8cce42"/></g>
+<g fill="#263532" font-family="system-ui, -apple-system, sans-serif"><text x="124" y="64" font-size="58" font-weight="750" letter-spacing="-2">AMIS</text><text x="127" y="89" font-size="14">Agent Memory Interface Spec</text></g>
+</svg>
