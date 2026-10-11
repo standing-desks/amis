@@ -48,6 +48,26 @@ Edit `SPEC.md` for normative text. Edit `docs/guide.template.html` and `docs/ass
 
 `make check-conversions` runs four golden conversions and escaping, byte preservation, identity and scope checks. The [fixture guide](tests/fixtures/conversions/README.md) describes the tested input and output formats. The browser uses the same offline renderer. Native loading and safe publication still require adapter integration tests.
 
+## Consume a pinned draft
+
+Pin an exact repository commit, including `schemas/`, when using these draft artifacts.
+The importable [Python API](amis_contract.py) provides `loads`, `seal`, `digest`,
+`record_reference`, `validate_bundle` and `validate_document`. Add the checkout root
+to Python's module path and install `requirements-dev.txt`. Importing the API does
+not run tests or generate reports. Validation remains active under `python -O`.
+
+`validate_bundle` returns `valid` or `archive_only` for unknown required features.
+`validate_document(kind, value)` checks the schema and integrity of a plan, receipt
+or capability descriptor. Invalid inputs raise exceptions. Callers must enforce
+input limits and retain receiver-owned authorization and publication policy.
+External snapshot files are not resolved by this offline checker. These checks
+cover the tested draft behaviors, not all normative requirements of the spec.
+
+The dependency also provides the pure CommonJS/browser renderer at
+`docs/assets/projections.js`: `render(record, {target, route})` returns proposed
+files or a blocked route. Validate the bundle before rendering and hold
+`archive_only` bundles. Rendering does not authorize or perform a write.
+
 ## Toward 1.0
 
 Stability requires shared conformance vectors, independent implementations, a reviewed extension registry, explicit draft migrations and tested native profiles. Breaking semantics require versioned changes; the draft does not promise unlimited forward compatibility.

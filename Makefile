@@ -1,6 +1,6 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: docs check check-docs check-browser check-contract check-conversions
+.PHONY: docs check check-docs check-browser check-contract check-conversions check-api
 
 docs:
 	$(PYTHON) tools/build_docs.py
@@ -17,4 +17,7 @@ check-conversions:
 check-contract:
 	$(PYTHON) tests/check_contract.py
 
-check: check-docs check-browser check-contract
+check-api:
+	$(PYTHON) tests/check_api.py
+
+check: check-docs check-browser check-contract check-api

@@ -1,75 +1,13 @@
 from pathlib import Path
-import json,copy,hashlib,base64,uuid,datetime,re
+import json,copy,hashlib,base64,uuid,datetime,re,sys
 import jsonschema,rfc8785
 ROOT=Path(__file__).resolve().parents[1]
-D=ROOT/'schemas'/'0.4.0'
+sys.path.insert(0,str(ROOT))
+from amis_contract import (digest, seal, record_reference as rr, strict_pairs, path_ok,
+                           validate_bundle as validate, schemas, validators)
 EXAMPLES=ROOT/'examples'
 ARTIFACTS=ROOT/'test-results'
 ARTIFACTS.mkdir(exist_ok=True)
-schemas={n:json.loads((D/f'{n}.schema.json').read_text()) for n,suffix in [('bundle',''),('plan','-plan'),('receipt','-receipt'),('capabilities','-capabilities')]}
-for s in schemas.values():jsonschema.Draft202012Validator.check_schema(s)
-validators={k:jsonschema.Draft202012Validator(s,format_checker=jsonschema.FormatChecker()) for k,s in schemas.items()}
-def digest(v):
- v=copy.deepcopy(v);v.pop('integrity',None);return hashlib.sha256(rfc8785.dumps(v)).hexdigest()
-def seal(v):
- v=copy.deepcopy(v);v['integrity']={'algorithm':'sha256','canonicalization':'jcs-rfc8785','digest':digest(v)};return v
-def rr(r):return {'memory_id':r['id'],'revision_id':r['revision']['id'],'digest':r['integrity']['digest']}
-def strict_pairs(pairs):
- d={}
- for k,v in pairs:
-  if k in d:raise ValueError('duplicate JSON member')
-  d[k]=v
- return d
-def path_ok(path):return path.startswith('sources/') and all(x not in ('','.','..') for x in path.split('/')) and not any(x in path for x in ['\\','\x00',':'])
-def validate(d):
- validators['bundle'].validate(d)
- assert digest(d)==d['integrity']['digest'],'bundle integrity'
- snaps={}
- for s in d['snapshots']:
-  assert s['sha256'] not in snaps,'duplicate snapshot'
-  if s['availability']!='included':
-   snaps[s['sha256']]=None;continue
-  if 'text' in s:b=s['text'].encode()
-  elif 'base64' in s:
-   b=base64.b64decode(s['base64'],validate=True);assert base64.b64encode(b).decode()==s['base64'],'base64 canonical'
-  else:
-   assert path_ok(s['path']),'path escape'
-   raise ValueError('external fixtures not loaded by this offline check')
-  assert s['byte_length']==len(b) and hashlib.sha256(b).hexdigest()==s['sha256'],'snapshot integrity'
-  snaps[s['sha256']]=b
- records={}
- for r in d['records']:
-  rid=r['revision']['id'];assert rid not in records,'duplicate revision';records[rid]=r
-  assert digest(r)==r['integrity']['digest'],'record integrity'
-  v=r['validity'];assert not(v['not_before'] and v['expires_at']) or datetime.datetime.fromisoformat(v['not_before'].replace('Z','+00:00'))<datetime.datetime.fromisoformat(v['expires_at'].replace('Z','+00:00')),'validity interval'
-  for src in r['sources']:
-   if src['snapshot_ref'] is None:continue
-   b=snaps[src['snapshot_ref']]
-   if b is None:continue
-   if 'selector' in src:
-    t=src['selector'];assert t['start']+t['length']<=len(b),'selector bounds';b.decode();b[:t['start']].decode();b[:t['start']+t['length']].decode()
- missing=[];edges={}
- for rid,r in records.items():
-  edges[rid]=[]
-  for parent in r['revision']['parents']:assert parent['memory_id']==r['id'],'parent memory'
-  for dep in r['revision']['parents']+r['derivation']['inputs']:
-   assert dep['revision_id']!=rid,'self reference'
-   other=records.get(dep['revision_id'])
-   if other:
-    assert rr(other)==dep,'reference integrity'
-    if dep in r['revision']['parents']:assert r['created_at']==other['created_at'],'creation time'
-    edges[rid].append(dep['revision_id'])
-   elif dep not in missing:missing.append(dep)
- if d['history']['coverage']=='complete':assert not missing and not d['history']['missing_parents'],'incomplete history'
- else:assert sorted(missing,key=str)==sorted(d['history']['missing_parents'],key=str),'undeclared missing parents'
- def visit(rid,stack,seen):
-  assert rid not in stack,'cycle'
-  if rid in seen:return
-  for x in edges[rid]:visit(x,stack|{rid},seen)
-  seen.add(rid)
- for rid in records:visit(rid,set(),set())
- known={'amis.scope.v1','amis.revision-graph.v1','amis.integrity.jcs-sha256.v1','amis.links.v1'}
- return 'archive_only' if set(d['required_features'])-known else 'valid'
 example=json.loads((EXAMPLES/'project-feedback.amis.json').read_text(),object_pairs_hook=strict_pairs)
 fixtures=json.loads(((ARTIFACTS/'browser-bundles.json') if (ARTIFACTS/'browser-bundles.json').exists() else (ROOT/'tests'/'fixtures'/'browser-bundles.json')).read_text())
 for d in [example]+fixtures:assert validate(d)=='valid'
