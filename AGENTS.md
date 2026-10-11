@@ -12,3 +12,4 @@ This repository defines Agent Memory Interface Spec, an independent draft for po
 - Keep dependency changes intentional and retain lockfiles. Do not add implementation-specific dependencies to the portable format.
 
 - Do not use em dashes (U+2014) or en dashes (U+2013) in authored prose. Use commas, colons, parentheses, ordinary hyphens, or separate sentences. Preserve exact imported source bytes.
+- Do not use the plural form of "strand" in prose or asset descriptions. Use threads or ribbons instead.

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="440" height="104" viewBox="0 0 440 104" role="img" aria-labelledby="title desc">
 <title id="title">AMIS, Agent Memory Interface Spec</title>
-<desc id="desc">Woven cyan and pink strands with a green leaf, next to the AMIS name.</desc>
+<desc id="desc">Woven cyan and pink threads with a green leaf, next to the AMIS name.</desc>
 <g transform="translate(4 4)"><rect width="96" height="96" rx="23" fill="#202326"/>
   <g fill="none" stroke-width="9" stroke-linecap="round">
     <path d="M27 73C27 51 69 48 69 26" stroke="#62eaff"/>
