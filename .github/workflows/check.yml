@@ -1,4 +1,4 @@
-name: AMIS checks
+name: AMIS documentation checks
 
 on:
   push:
@@ -9,6 +9,7 @@ permissions:
 
 jobs:
   check:
+    name: Documentation
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -29,6 +30,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: amis-validation
+          name: amis-documentation-checks
           path: test-results/
           if-no-files-found: ignore

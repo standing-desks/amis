@@ -2,6 +2,8 @@
 
 ## Updates
 
+- Complete the spec-only repository boundary: remove the Python validator, API and contract tests, validator fixtures, and executable canonicalization and hashing from the guide. Validators and other reference implementations belong to consuming projects.
+- Keep the documentation build and documentation-only checks, and remove validator dependencies and Make targets. AMIS 0.4.0 schemas, examples and behavioral requirements are unchanged.
 - Scope the repository to the specification, schemas, portable examples, conformance vectors and reference validation tooling. Consuming projects own native converters, profiles and integration tests.
 - Move the Codex/Claude renderer and golden conversion fixtures to Twine. Replace the converter demonstration and harness roadmap with a portable contract guide. The 0.4.0 wire schemas are unchanged.
 - Remove em and en dashes from authored content and record the writing preference.

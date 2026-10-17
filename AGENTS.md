@@ -3,12 +3,12 @@
 This repository defines Agent Memory Interface Spec, an independent specification for portable agent memory and adapter behavior.
 
 - Keep the core vendor-neutral. Provider, storage, UI and transport details belong in profiles or informative examples.
-- Keep this repository scoped to the specification and supporting schemas, portable examples, documentation, conformance vectors and reference validation tooling. Consuming projects own native converters, provider profiles, native fixtures, integration tests and product interfaces. Do not add harness support roadmaps or native format renderers here.
+- Keep this repository scoped to the specification, schemas, portable examples and documentation, plus the documentation build and its checks. Consuming projects own validators, canonicalization implementations, converters, provider profiles, native fixtures, integration tests and product interfaces. Do not add reference implementations, executable validation demonstrations, harness support roadmaps or native format renderers here.
 - Treat `SPEC.md` as the normative source. Generate `docs/spec.html` from it; do not edit that generated file directly.
 - Edit `docs/guide.template.html` and `docs/assets/` for the interactive guide. `docs/index.html` embeds the canonical example and is generated.
-- Keep schemas, examples, specification and fixtures consistent. Behavioral constraints are not all expressible in JSON Schema.
+- Keep schemas, examples and specification consistent. Behavioral constraints are not all expressible in JSON Schema; implementations must enforce them independently.
 - Preserve immutable identities, exact revision references, truthful provenance, explicit compatibility and receiver-owned authorization.
-- Do not claim native integration, independent implementation conformance or industry adoption based on browser/schema checks.
+- Do not claim semantic validation, native integration, independent implementation conformance or industry adoption based on documentation checks.
 - Run `make docs` and `make check` for contract or documentation changes. Update `CHANGELOG.md` when the contract changes.
 - Keep dependency changes intentional and retain lockfiles. Do not add implementation-specific dependencies to the portable format.
 

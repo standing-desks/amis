@@ -13,14 +13,9 @@ fs.mkdirSync(artifacts, {recursive:true});
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(pathToFileURL(path.join(docs,'index.html')).href);
-  await page.waitForFunction(() => window.amisSpecDemo && document.querySelector('#passport-code').textContent);
-  const example = await page.evaluate(() => window.amisSpecDemo.getDocument());
+  await page.waitForFunction(() => document.querySelector('#passport-code').textContent);
+  const example = JSON.parse(await page.locator('#canonical-example').textContent());
   assert.deepEqual(example, JSON.parse(fs.readFileSync(path.join(docs,'../examples/project-feedback.amis.json'))));
-  assert.equal(await page.evaluate(async () => {
-    const api=window.amisSpecDemo, value=api.getDocument();
-    return await api.integrityOK(value) && await api.integrityOK(value.records[0]);
-  }), true);
-  assert.equal(await page.evaluate(() => window.amisProjections), undefined);
   for (const group of ['identity','meaning','scope','provenance']) {
    await page.locator('[data-passport="'+group+'"]').click();
    JSON.parse(await page.locator('#passport-code').innerText());
@@ -34,7 +29,7 @@ fs.mkdirSync(artifacts, {recursive:true});
   }
   for (const name of ['fork','tamper','feature','withdrawal']) {
    await page.locator('[data-stress="'+name+'"]').click();
-   if (name === 'tamper') await page.waitForFunction(() => document.querySelector('#stress-result').innerText.includes('MISMATCH'));
+   if (name === 'tamper') assert.match(await page.locator('#stress-result').innerText(),/Changing the scope/);
    assert.ok((await page.locator('#stress-result').innerText()).length > 80);
   }
   await page.screenshot({path:path.join(artifacts,'spec-guide.png')});
@@ -56,7 +51,7 @@ fs.mkdirSync(artifacts, {recursive:true});
    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth+1),false,file);
   }
   assert.deepEqual(errors,[]);
-  const report={result:'PASS',scope:'Portable specification guide; no native conversions',field_groups:4,profiles:4,contract_examples:4,responsive_widths:[1480,1024,768,390],browser_errors:errors};
+  const report={result:'PASS',scope:'Documentation presentation only; no AMIS semantic validation',field_groups:4,profiles:4,explanatory_examples:4,responsive_widths:[1480,1024,768,390],browser_errors:errors};
   fs.writeFileSync(path.join(artifacts,'browser-report.json'),JSON.stringify(report,null,2)+'\n');
   console.log(JSON.stringify(report,null,2));
  } finally { await browser.close(); }

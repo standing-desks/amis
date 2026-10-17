@@ -8,11 +8,11 @@
 
 ## Repository boundary
 
-This repository owns the specification and its supporting schemas, portable examples, conformance vectors, reference validation tooling and documentation.
+This repository contains only the specification, schemas, portable examples and documentation, with a documentation build and documentation checks.
 
-Consuming projects own converters between AMIS and native formats, provider profiles, native fixtures, integration tests, publication, synchronization and product interfaces. They publish their own supported-harness lists and compatibility claims.
+Consuming projects own validators, canonicalization implementations, converters between AMIS and native formats, provider profiles, native fixtures, integration tests, publication, synchronization and product interfaces. They publish their own supported-harness lists and compatibility claims.
 
-[Twine](https://github.com/standing-desks/twine) owns its Codex and Claude Code converters and conversion tests. Those implementations are maintained separately from AMIS. This repository does not distribute native converters or promise support for particular harnesses.
+[Twine](https://github.com/standing-desks/twine) owns its Codex and Claude Code converters and conversion tests. Implementations are maintained separately from AMIS. No validator, converter, renderer, SDK or reference implementation is distributed here.
 
 ## Development
 
@@ -26,6 +26,6 @@ npx playwright install chromium
 make check
 ```
 
-After documentation changes, run `make docs` and `make check`. Checks cover the portable contract, generated documentation and the specification guide. They do not establish native integration conformance. See [Contributing](CONTRIBUTING.md) and the [changelog](CHANGELOG.md).
+After documentation changes, run `make docs` and `make check`. Checks cover generated-document freshness, displayed examples, local documentation links and browser presentation. They do not validate AMIS semantics or establish implementation conformance. See [Contributing](CONTRIBUTING.md) and the [changelog](CHANGELOG.md).
 
-To use the [reference validator](amis_contract.py), pin an exact repository commit, including `schemas/`. It checks AMIS structure, integrity and tested behavioral rules; callers own resource limits, native conversion, authorization and publication. The ownership change leaves the 0.4.0 wire schemas unchanged.
+To implement AMIS, pin an exact specification revision and its `schemas/` and `examples/`. Follow `SPEC.md` for strict parsing, canonical integrity, scope, history and other behavioral requirements beyond JSON Schema. The repository cleanup leaves the 0.4.0 wire schemas and examples unchanged.

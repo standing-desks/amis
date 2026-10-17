@@ -2,9 +2,9 @@
   "name": "amis-spec",
   "version": "0.4.0",
   "private": true,
-  "description": "Agent Memory Interface Spec - specification artifacts and browser validation",
+  "description": "Agent Memory Interface Spec - documentation build and browser checks",
   "scripts": {
-    "test": "node tests/check_browser.cjs"
+    "test": "node tools/check_docs.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.0"
