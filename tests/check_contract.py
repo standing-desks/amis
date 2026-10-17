@@ -9,7 +9,7 @@ EXAMPLES=ROOT/'examples'
 ARTIFACTS=ROOT/'test-results'
 ARTIFACTS.mkdir(exist_ok=True)
 example=json.loads((EXAMPLES/'project-feedback.amis.json').read_text(),object_pairs_hook=strict_pairs)
-fixtures=json.loads(((ARTIFACTS/'browser-bundles.json') if (ARTIFACTS/'browser-bundles.json').exists() else (ROOT/'tests'/'fixtures'/'browser-bundles.json')).read_text())
+fixtures=json.loads((ROOT/'tests'/'fixtures'/'bundles.json').read_text())
 for d in [example]+fixtures:assert validate(d)=='valid'
 checks=[]
 def rejects(name,fn):
@@ -49,7 +49,7 @@ partial['history']={'coverage':'complete','missing_parents':[]};rejects('missing
 bad=copy.deepcopy(fork);bad['records'][1]['revision']['parents'][0]['digest']='0'*64;bad['records'][1]=seal(bad['records'][1]);rejects('parent digest mismatch',lambda:validate(seal(bad)))
 W=branch(M,'temporary');W.pop('body');W['status']='withdrawn';W['sources']=[];W['withdrawal']={'reason':'user_request'};W=seal(W);fork['records'].append(W);validate(seal(fork));checks.append('content-free withdrawal')
 ref=rr(A);sha=example['snapshots'][0]['sha256'];now=example['exported_at'];newid=lambda:str(uuid.uuid4())
-plan=seal({'format':'amis.plan','version':'0.4.0','id':newid(),'record':ref,'expected_heads':[ref],'target':{'provider':'claude_code','profile':'example.claude.native.v1','binding_id':newid(),'binding_digest':sha,'adapter':'fixture@0.3','capabilities_digest':sha},'created_at':now,'expires_at':'2026-11-01T00:00:00Z','coordination':'quiescent_required','mutations':[{'resource_ref':'urn:example:target-topic','before':{'state':'absent'},'after':{'state':'present','sha256':sha,'snapshot_ref':sha},'role':'topic'}],'fidelity':[{'pointer':'/body/text','outcome':'verbatim','detail':'Fixture bytes'}],'blockers':[]})
+plan=seal({'format':'amis.plan','version':'0.4.0','id':newid(),'record':ref,'expected_heads':[ref],'target':{'provider':'org.example.notes','profile':'org.example.notes.v1','binding_id':newid(),'binding_digest':sha,'adapter':'fixture@0.4','capabilities_digest':sha},'created_at':now,'expires_at':'2026-11-01T00:00:00Z','coordination':'quiescent_required','mutations':[{'resource_ref':'urn:example:target-topic','before':{'state':'absent'},'after':{'state':'present','sha256':sha,'snapshot_ref':sha},'role':'topic'}],'fidelity':[{'pointer':'/body/text','outcome':'verbatim','detail':'Fixture bytes'}],'blockers':[]})
 validators['plan'].validate(plan)
 remove=copy.deepcopy(plan);remove['mutations'][0]['before'],remove['mutations'][0]['after']=remove['mutations'][0]['after'],remove['mutations'][0]['before'];remove=seal(remove);validators['plan'].validate(remove);checks.append('create and remove plans')
 invalid=copy.deepcopy(remove);invalid['mutations'][0]['after']['sha256']=sha;rejects('absent state cannot carry a content hash',lambda:validators['plan'].validate(seal(invalid)))

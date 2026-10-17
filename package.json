@@ -4,12 +4,10 @@
   "private": true,
   "description": "Agent Memory Interface Spec - specification artifacts and browser validation",
   "scripts": {
-    "test": "node tests/check_browser.cjs && node tests/check_conversions.cjs",
-    "test:conversions": "node tests/check_conversions.cjs"
+    "test": "node tests/check_browser.cjs"
   },
   "devDependencies": {
-    "playwright": "1.64.0",
-    "yaml": "2.9.1"
+    "playwright": "1.64.0"
   },
   "engines": {
     "node": ">=22"

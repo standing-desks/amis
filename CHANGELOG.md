@@ -2,6 +2,8 @@
 
 ## Updates
 
+- Scope the repository to the specification, schemas, portable examples, conformance vectors and reference validation tooling. Consuming projects own native converters, profiles and integration tests.
+- Move the Codex/Claude renderer and golden conversion fixtures to Twine. Replace the converter demonstration and harness roadmap with a portable contract guide. The 0.4.0 wire schemas are unchanged.
 - Remove em and en dashes from authored content and record the writing preference.
 - Add the woven AMIS SVG logo, favicon, dark variant and eight interface icons.
 - Share the offline projection renderer with the visual guide and test exact files in both Codex/Claude directions.

@@ -1,133 +1,82 @@
 'use strict';
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const clone=x=>JSON.parse(JSON.stringify(x));
-const seed=JSON.parse($('canonical-example').textContent);
-const revisionIDs={"claude": {"feedback": "94ad0ada-a766-5890-b5a7-7b6f2e32932a", "lesson": "72b60ff9-6ee8-5d51-bcbb-54b2f21e6b39", "global": "122d5c48-a6b1-5490-bfc2-5e741ed71653", "unknown": "6e1faf76-c08a-5c5e-ab2d-a9a090f00d45"}, "codex": {"feedback": "83859060-6fbc-57fa-8406-2e23babb413b", "lesson": "fc269d80-9989-5922-bdf2-c4a3798ef740", "global": "aaf6bf0d-4b12-51e6-b69d-75964d16d26d", "unknown": "c613ab57-87c5-5fa2-9b6e-d1bf77696d10"}};
-const names={claude:'Claude Code',codex:'Codex'};
-const fixtures={
- feedback:{id:'805b3b19-1266-4254-a5cc-2c4eb30428ec',title:'Focused validation',kind:'feedback',scope:'project',body:'For this project, run the focused checks for the changed component before broader validation.'},
- lesson:{id:'f5c8d1bb-7ae1-4e47-9071-758907ac73c1',title:'Native text offsets',kind:'learning',scope:'project',body:'For this project, preserve UTF-16 offsets when translating native editor text ranges.'},
- global:{id:'2cbe4e5b-f7c9-4e8a-a595-bbcaa84f94d9',title:'Response preference',kind:'user',scope:'global',body:'I prefer concise responses with concrete examples across my projects.'},
- unknown:{id:'915f3c25-f859-45b5-8e1f-d917187542ab',title:'Validation note',kind:'feedback',scope:'unknown',body:'Run focused checks before broad validation.'}
+const $ = id => document.getElementById(id);
+const esc = text => String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clone = value => JSON.parse(JSON.stringify(value));
+const doc = JSON.parse($('canonical-example').textContent);
+const record = doc.records[0];
+let selectedGroup = 'identity', full = false, stressEpoch = 0;
+function canonical(value) {
+  if (value === null) return 'null';
+  if (typeof value === 'string') {
+    for (const c of value) { const n = c.codePointAt(0); if (n >= 0xd800 && n <= 0xdfff) throw Error('Invalid Unicode scalar'); }
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value) || (Number.isInteger(value) && !Number.isSafeInteger(value))) throw Error('Unsupported numeric value');
+    return JSON.stringify(value);
+  }
+  if (typeof value === 'boolean') return value ? 'true' : 'false';
+  if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
+  if (typeof value === 'object') return '{' + Object.keys(value).sort().map(key => canonical(key) + ':' + canonical(value[key])).join(',') + '}';
+  throw Error('Unsupported JSON value');
+}
+async function seal(value) {
+  const copy = clone(value); delete copy.integrity;
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonical(copy)));
+  const digest = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('');
+  return {...copy, integrity:{algorithm:'sha256',canonicalization:'jcs-rfc8785',digest}};
+}
+async function integrityOK(value) { return (await seal(value)).integrity.digest === value.integrity?.digest; }
+const groups = {
+  identity:{note:'Memory identity stays stable. Each changed revision has a distinct UUID and exact parent references. Integrity covers all meaning-bearing fields.',value:() => ({id:record.id,revision:record.revision,created_at:record.created_at,integrity:record.integrity})},
+  meaning:{note:'The record carries the claim, representation and an open kind. Native parsing and rendering are maintained by consuming projects.',value:() => ({title:record.title,kind:record.kind,body:record.body})},
+  scope:{note:'Scope describes intended applicability. Lifecycle and validity are separate. Receiver-owned bindings and approval never come from portable content.',value:() => ({scope:record.scope,status:record.status,validity:record.validity})},
+  provenance:{note:'Sources reference exact snapshot hashes. Derivation declares transformations and input revisions. Missing evidence is recorded explicitly.',value:() => ({sources:record.sources,derivation:record.derivation,provenance:record.provenance,snapshots:doc.snapshots})}
 };
-let state={view:'flow',source:'claude',example:'feedback',stage:4,field:'body',route:'context',round:'same',full:false,passport:'identity',running:false,design:'library'};
-let doc=clone(seed),sourceText='',epoch=0;
-const record=()=>doc.records[0];
-const target=()=>state.source==='claude'?'codex':'claude';
-const badge=(s,c='')=>'<span class="badge '+c+'">'+esc(s)+'</span>';
-const tag=h=>'<i class="harness-dot '+(h==='claude'?'claude':'')+'"></i>'+names[h];
-const delay=ms=>new Promise(r=>setTimeout(r,ms));
-async function hash(text){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('')}
-function nativeSource(){const f=fixtures[state.example];return state.source==='claude'?'---\nname: '+f.title+'\ndescription: Example source note\n'+(f.kind==='learning'?'':'type: '+f.kind+'\n')+'---\n\n'+f.body+'\n':'# '+f.title+'\n\n'+f.body+'\n'}
-function sourcePath(){return state.source==='claude'?'memory/'+state.example+'.md':'memories/MEMORY.md · '+fixtures[state.example].title}
-function canonical(value){
- if(value===null)return 'null';
- if(typeof value==='string'){for(const c of value){const n=c.codePointAt(0);if(n>=0xd800&&n<=0xdfff)throw Error('Invalid Unicode scalar')}return JSON.stringify(value)}
- if(typeof value==='number'){if(!Number.isFinite(value)||(Number.isInteger(value)&&!Number.isSafeInteger(value)))throw Error('Unsupported numeric value');return JSON.stringify(value)}
- if(typeof value==='boolean')return value?'true':'false';
- if(Array.isArray(value))return '['+value.map(canonical).join(',')+']';
- if(typeof value==='object')return '{'+Object.keys(value).sort().map(k=>canonical(k)+':'+canonical(value[k])).join(',')+'}';
- throw Error('Unsupported JSON value');
+function showGroup(key) {
+  selectedGroup = key;
+  document.querySelectorAll('[data-passport]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.passport === key)));
+  $('passport-file').textContent = full ? 'memory.amis.json / complete bundle' : 'record / ' + key;
+  $('passport-code').textContent = JSON.stringify(full ? doc : groups[key].value(), null, 2);
+  $('passport-explain').textContent = full ? 'The complete portable AMIS 0.4.0 example. This guide does not convert or publish native files.' : groups[key].note;
+  $('show-full').textContent = full ? 'Show selected fields' : 'Show full bundle';
 }
-async function seal(value){const copy=clone(value);delete copy.integrity;return {...copy,integrity:{algorithm:'sha256',canonicalization:'jcs-rfc8785',digest:await hash(canonical(copy))}}}
-async function integrityOK(value){return (await seal(value)).integrity.digest===value.integrity?.digest}
-async function refresh(resetRoute=true){
- const token=++epoch;state.running=false;state.stage=4;state.round='same';
- const f=fixtures[state.example],text=nativeSource(),digest=await hash(text);if(token!==epoch)return;
- const next=clone(seed),r=next.records[0];
- r.id=f.id;r.title=f.title;r.kind=f.kind;r.revision.id=revisionIDs[state.source][state.example];
- r.body.text=state.source==='claude'?text.replace(/^---\n[\s\S]*?\n---\n\n/,'').replace(/\n$/,''):text.replace(/^# [^\n]+\n\n/,'').replace(/\n$/,'');
- r.scope=f.scope==='unknown'?{kind:'unknown'}:f.scope==='global'?{kind:'global',subject_ref:'user:local-owner'}:{kind:'project',project_ref:'c8530199-86e3-42bf-b4dd-aa811700916a'};
- r.status='active';
- r.sources=[{source_id:state.source+':fixture-store:'+state.example,provider:state.source==='claude'?'claude_code':'codex',locator:sourcePath(),snapshot_ref:digest,observed_at:r.created_at,source_created_at:null,native_kind:state.source==='claude'&&f.kind!=='learning'?f.kind:null}];
- r.derivation={mode:'parsed',adapter:state.source+'-fixture@0.4.0',inputs:[]};
- next.snapshots=[{sha256:digest,byte_length:new TextEncoder().encode(text).length,media_type:'text/markdown',availability:'included',text}];
- next.records[0]=await seal(r);const sealed=await seal(next);if(token!==epoch)return;
- sourceText=text;doc=sealed;
- if(resetRoute)state.route=(target()==='codex'&&f.scope==='project')||(target()==='claude'&&f.scope==='global')?'context':'native';
- render();showPassport(state.passport);
-}
-function projection(){return window.amisProjections.render(record(),{target:target(),route:state.route})}
-function blockedReason(){const out=projection();return out.kind==='blocked'?out.reason:null}
-function nativeOutput(){const out=projection();
- if(out.kind==='blocked')return {path:'Publication held',text:out.reason,kind:'blocked',phase:'No output plan until the scope or route is resolved',files:[]};
- return {path:out.files.map(f=>f.path).join(' + '),text:out.files.map(f=>(out.files.length>1?'# File: '+f.path+'\n':'')+f.text).join('\n'),kind:out.kind,files:out.files,phase:out.kind==='context'?'Rendered context · effective loading still needs verification':'Native candidate · requires backend and loading verification'};
-}
-const fieldNotes={body:'AMIS body.text preserves the claim and qualifiers. This fixture strips a known wrapper; general parsing must preserve exact spans and never summarize silently.',kind:'Kind is a first-class, open string. A target must support its meaning. A technical learning does not become user feedback just to fit a destination.',scope:'Semantic scope is independent of storage location. A repository-scoped record cannot be sent to a global-only store by merely labeling the prose.',identity:'A durable UUID identifies the memory. A marker is trusted only when matched with a receipt owned by this receiving application.',revision:'Accepted edits create UUID revisions with exact parent IDs and hashes. Reimporting an unchanged projection does not create a new revision.',sources:'Sources reference exact SHA-256 snapshots. Unknown source creation dates remain null; the AMIS record has its own observation and creation times.'};
-function codeLines(text){return text.split('\n').map(line=>{let f=line===record().body.text?'body':line.startsWith('type:')||line.startsWith('Kind:')?'kind':line.startsWith('Scope:')?'scope':line.includes('amis-memory:id=')?'identity':'';return '<span class="line '+(f===state.field?'selected':'')+'" '+(f?'data-field="'+f+'" tabindex="0" role="button" aria-label="Inspect '+f+'"':'')+'>'+esc(line||' ')+'</span>'}).join('')}
-function chip(f,label,text){return '<button class="field-chip '+(state.field===f?'selected':'')+'" data-field="'+f+'"><span>'+label+'</span><b>'+esc(text)+'</b></button>'}
-function connector(label){return '<div class="connector" aria-hidden="true"><svg viewBox="0 0 50 32"><line x1="2" y1="16" x2="44" y2="16"/><path d="M38 11 L44 16 L38 21" fill="none" stroke="#8eab98" stroke-width="1.5"/><circle cx="22" cy="16" r="3" class="'+(state.running?'replay':'')+'"/></svg><span class="caption">'+label+'</span></div>'}
-function routeSelect(){return '<label class="control">Target route <select id="route" aria-label="Target export route"><option value="native" '+(state.route==='native'?'selected':'')+'>Native memory</option><option value="context" '+(state.route==='context'?'selected':'')+'>Scoped context files</option></select></label>'}
-function render(){
- $('direction-from').innerHTML=tag(state.source);$('direction-to').innerHTML=tag(target());
- document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.view===state.view));
- $('stage-progress').innerHTML=['Snapshot','Normalize','Validate','Render'].map((t,i)=>'<span class="'+(state.stage>i?'is-done':'')+'"><i class="progress-dot"></i>'+t+'</span>').join(' → ')+' <span>· simulation</span>';
- $('transform').disabled=state.running;$('transform').textContent=state.running?'Transforming…':'Replay transformation →';
- ({flow:renderFlow,mapping:renderMapping,roundtrip:renderRound})[state.view]();
-}
-function renderFlow(){const r=record(),o=nativeOutput();
- const middle=state.stage>=2?'<div class="packet"><div class="card-head"><strong><span class="amis-icon icon-record" aria-hidden="true"></span>AMIS record</strong><small>Core / 0.4.0</small></div><div class="packet-title">'+esc(r.title)+'</div><div class="packet-body">'+esc(r.body.text)+'</div><div class="packet-fields">'+chip('kind','kind',r.kind)+chip('scope','scope',r.scope.kind)+chip('identity','id',r.id.slice(0,8)+'…')+chip('revision','revision',r.revision.id.slice(0,8)+' · '+(r.scope.kind==='unknown'?'review pending':'locally reviewed'))+chip('sources','sources',names[state.source])+chip('body','body.format','text/markdown')+'</div><div class="native-foot">Original snapshot attached · no external envelope</div></div>':'<div class="placeholder"><span class="big-glyph">⌘</span><p>An AMIS record takes shape here.</p></div>';
- const output=state.stage>=4?'<div class="target-card"><div class="card-head '+target()+'"><strong>'+names[target()]+'</strong>'+badge(o.kind==='blocked'?'Held':'Rendered',o.kind==='blocked'?'amber':'green')+'</div><div class="file-label">'+esc(o.path)+'</div><div class="native-lines">'+codeLines(o.text)+'</div><div class="native-foot">'+esc(o.phase)+'</div></div>':'<div class="placeholder"><span class="big-glyph">↗</span><p>The target adapter renders its format.</p></div>';
- $('lab-view').innerHTML='<div class="canvas"><div><div class="stage-label"><span class="n">1</span><strong>Source harness</strong><small>Read only</small></div><div class="source-card"><div class="card-head '+state.source+'"><strong>'+names[state.source]+'</strong><small>Native text</small></div><div class="file-label">'+esc(sourcePath())+'</div><div class="native-lines">'+codeLines(sourceText)+'</div><div class="native-foot">Exact snapshot · SHA-256 '+doc.snapshots[0].sha256.slice(0,12)+'…</div></div><div class="under-card">Illustrative source + local scope review.<br>No source timestamp is invented.</div></div>'+connector('Normalize')+'<div><div class="stage-label"><span class="n">2</span><strong>AMIS record</strong><small>Canonical</small></div>'+middle+'<div class="under-card">Stable record, independent of any harness.<br>Publication approval stays local and binds the exact digest.</div></div>'+connector('Project')+'<div><div class="stage-label"><span class="n">3</span><strong>Target harness</strong></div>'+output+'<div class="under-card">'+routeSelect()+'</div></div></div><div class="field-inspector"><span class="field-key">'+state.field+'</span><p>'+fieldNotes[state.field]+'</p></div>';
-}
-function mappingRows(){const r=record(),native=state.route==='native',held=blockedReason(),scopeHeld=r.scope.kind==='unknown'||(native&&target()==='codex'&&r.scope.kind!=='global')||(native&&target()==='claude'&&r.scope.kind==='global');return [
- ['body.text','Native body','Unchanged wording','Verbatim'],['body.format','Source markup','Markdown representation','Mapped'],['title · kind','Native metadata / reviewed meaning',native&&target()==='claude'&&r.kind==='learning'?'No matching native category':'Header / matching native type','Mapped'],['scope','Explicit local review',scopeHeld?'Publication held: incompatible or unknown scope':r.scope.kind+' loading boundary','Mapped'],['id · revision','Assigned / persisted by the producer','Marker + owned receipt','Sidecar'],['sources · derivation · provenance','Source and transformation evidence','Complete bundle retained by the receiver','Sidecar'],['status · validity','Claim lifecycle and optional validity interval','Expiry and withdrawal gates; approval stays local','Sidecar'],['created_at · revision.created_at','Observed record and revision dates','Provenance only; clocks never pick a conflict winner','Sidecar'],['integrity · revision.parents','Canonical hash and exact parent references','Scope and lineage covered by the digest','Sidecar'],['format · version · extensions + unknown fields','Unrecognized additions','Preserved in canonical bundle','Sidecar'],['Bundle metadata · snapshots','Format/version, producer, feature list, exact bytes','AMIS bundle and snapshot store','Sidecar']
- ].map(row=>row[0]==='scope'&&scopeHeld?[row[0],row[1],row[2],'Blocked']:row[0]==='title · kind'&&row[2].startsWith('No ')?[row[0],row[1],row[2],'Blocked']:row)}
-function renderMapping(){const held=blockedReason();$('lab-view').innerHTML='<div class="fidelity">'+badge('11 groups · core fixture fields accounted for','green')+badge(held?'Publication held':'Rendered proposal',held?'amber':'blue')+'</div><div class="table-wrap"><table class="mapping-table"><thead><tr><th>AMIS field</th><th>Origin</th><th>Destination</th><th>Fidelity</th></tr></thead><tbody>'+mappingRows().map(row=>'<tr>'+row.slice(0,3).map(t=>'<td>'+esc(t)+'</td>').join('')+'<td>'+badge(row[3],row[3]==='Blocked'?'amber':row[3]==='Verbatim'?'green':row[3]==='Mapped'?'blue':'')+'</td></tr>').join('')+'</tbody></table></div><div class="actions">'+routeSelect()+'</div><div class="callout '+(held?'amber':'')+'" style="margin-top:18px">'+esc(held||'A structurally complete bundle can still have a lossy native projection. “Sidecar” means the receiver retains it; it does not promise the harness reads it.')+'</div>'}
-function renderRound(){const held=blockedReason();const modes={same:['0','new records','Owned receipt + output hash match the last export. Treat this as the same evidence; no new record or revision.'],edited:['+1','review proposal','Native text changed; canonical revision stayed unchanged. Propose a new UUID revision with the exported revision as its parent. Review precedes acceptance.'],conflict:['2','versions preserved','Both the canonical record and the native projection changed since the export. Give each edit a unique revision ID and retain both parent branches. Pause this delivery until reviewed.'],lost:['?','identity unresolved','No owned receipt matches this marker or file. Treat it as untrusted input; a text match alone never proves identity. Hold possible echoes for review.'],withdrawn:['×','resurrection blocked','A known projection points to a withdrawn identity. Preserve the tombstone; do not reactivate it on reimport. Track native correction separately.']};const m=modes[state.round];
- $('lab-view').innerHTML='<div class="round-layout"><div class="round-graph"><div class="round-flow"><div class="round-node"><strong>'+names[state.source]+'</strong><small>Original source</small></div><span>→</span><div class="round-node center"><strong>AMIS · '+record().id.slice(0,8)+'</strong><small>Revision '+record().revision.id.slice(0,8)+'</small></div><span>→</span><div class="round-node"><strong>'+names[target()]+'</strong><small>'+ (held?'Held':'Rendered projection')+'</small></div></div><div class="return-path">Reconcile against the owned export receipt</div><div class="actions">'+[['same','Unchanged'],['edited','Native edit'],['conflict','Both edited'],['lost','Receipt missing'],['withdrawn','Withdrawn']].map(([k,t])=>'<button data-round="'+k+'" aria-pressed="'+(state.round===k)+'" '+(held?'disabled':'')+'>'+t+'</button>').join('')+'</div></div><div class="round-result"><div class="eyebrow">Simulated reconciliation</div><div class="big">'+(held?'-':m[0])+'</div><h3>'+(held?'Publication held':m[1])+'</h3><p>'+esc(held||m[2])+'</p></div></div><div class="actions">'+routeSelect()+'</div><div class="callout" style="margin-top:22px"><strong>One source, however many projections.</strong> Publishing a memory to another harness does not turn it into independent corroborating evidence.</div>';
-}
-const passportNotes={identity:{text:'Stable memory UUID plus a unique revision UUID and parent references. Concurrent edits form branches; no timestamp or counter chooses a winner.',value:()=>({id:record().id,revision:record().revision,created_at:record().created_at,integrity:record().integrity})},meaning:{text:'Readable content, a format declaration and an open kind. Preserve native wording and qualifiers.',value:()=>({title:record().title,kind:record().kind,body:record().body})},scope:{text:'Project UUIDs resolve through separately confirmed local bindings. Portable state never authorizes writes. Approval binds the record digest and confirmed target mapping in a separate local plan.',value:()=>({scope:record().scope,status:record().status,validity:record().validity,local_approval:'Separate local store; never part of a portable record'})},provenance:{text:'Sources reference exact original snapshots. The hash is computed from the fixture bytes. Derivation tracks parents when content is edited or consolidated.',value:()=>({sources:record().sources,derivation:record().derivation,provenance:record().provenance,snapshots:doc.snapshots})}};
-function showPassport(key){state.passport=key;document.querySelectorAll('[data-passport]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.passport===key));$('passport-file').textContent=state.full?'memory.amis.json / complete bundle':'record / '+key;$('passport-code').textContent=JSON.stringify(state.full?doc:passportNotes[key].value(),null,2);$('passport-explain').textContent=state.full?'Standalone AMIS 0.4.0 bundle. Every reference in this fixture resolves to an exact snapshot.':passportNotes[key].text;$('show-full').textContent=state.full?'Show selected fields':'Show full bundle'}
-const designs={
- library:{title:'One library, two delivery columns.',text:'Import into a local memory library. Review scope and content once, then choose the route for each harness. Each record shows its actual delivery status.',rows:[['Focused validation','Repository · feedback','Context planned','Native planned'],['Response preference','Global · user','Awaiting consolidation','Context planned'],['Validation note','Unknown scope','Held','Held']],action:'Review selected →',detail:'Canonical ownership: the selected library. Trigger: explicit import and publish. Best initial design because conflicts and unsupported routes stay visible. Tradeoff: an intentional review step before the first publication.'},
- packs:{title:'A portable pack with an import preview.',text:'Select records and their snapshots, export a .amis.json manifest, then inspect and map it on another machine. The receiving application creates new local target bindings and approval records.',rows:[['focused-validation.amis.json','1 record + exact snapshot','Inspect','Map repository'],['Publication approval','Local-only decision','Not in pack','Approve locally'],['Local receipts','Machine-specific write history','Do not trust','Create new plan']],action:'Inspect pack →',detail:'Canonical ownership: each library retains immutable revisions; the pack is a snapshot. Trigger: explicit export/import. Best for offline transfer and handoff. Tradeoff: concurrent revisions must be reconciled, and packs do not provide automatic freshness.'},
- sync:{title:'A change queue with delivery receipts.',text:'Watch selected stores and reconcile changes against the library. Opted-in, unchanged approved revisions may be retried automatically; new meaning, scope or conflicts enter review.',rows:[['Claude topic changed','Candidate UUID revision','Needs review','Preserve native edit'],['Codex export re-seen','Owned receipt matches','No new evidence','No-op'],['Withdrawal requested','Tombstone revision','Correction pending','Remove owned entry']],action:'Review changes →',detail:'Canonical ownership: the selected library’s revision history. Trigger: bounded watcher + periodic reconciliation. Best after adapter conformance passes. Tradeoff: more crash recovery, loop suppression, deletion handling and configuration drift to manage.'}
+const profiles = {
+  core:['Core','Records and portable bundles','Identity, scope, lifecycle, provenance, revision graphs and canonical integrity. This contract is independent of a provider, database, UI or transport.','amis.scope.v1'],
+  links:['Links','Explicit references between records','Typed links identify an exact revision or a current head set. They do not grant authority or create independent evidence.','amis.links.v1'],
+  publication:['Publication','Plans and honest delivery evidence','An optional contract for exact resource mutations, receiver-owned authorization, write coordination and separate availability observations. Consumers implement the native routes.','amis.publication.v1'],
+  sync:['Synchronization','Durable observation and reconciliation','An optional contract for scoped cursors, explicit withdrawal, retained conflicts and recovery. Consumers implement watchers and native coordination.','amis.sync.v1']
 };
-function renderDesign(key){state.design=key;const d=designs[key];document.querySelectorAll('[data-design]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.design===key));$('design-detail').innerHTML='<div class="design-copy"><div class="eyebrow">'+(key==='library'?'Recommended starting point':'Alternative orchestration')+'</div><h3>'+d.title+'</h3><p>'+d.text+'</p><p class="small">'+d.detail+'</p></div><div class="mini-app"><div class="mini-app-head"><span>● ● ●</span><strong>'+({library:'Memory library',packs:'Import memory pack',sync:'Memory changes'})[key]+'</strong><span>Illustrative</span></div><div class="table-wrap"><table class="mapping-table"><thead><tr><th>Memory / event</th><th>Meaning</th><th>'+(key==='library'?'Codex':'Outcome')+'</th><th>'+(key==='library'?'Claude Code':'Next step')+'</th></tr></thead><tbody>'+d.rows.map(row=>'<tr>'+row.map(t=>'<td>'+esc(t)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div><div class="mini-app-foot"><span>Proposal preview · no files written</span><a href="#playground">'+d.action+'</a></div></div>'}
-const ops={
- describe:{title:'Declare what the adapter can actually do.',text:'Report native layout, version/configuration evidence, supported scope and kinds, context routes, and verification strength. Capabilities are recomputed before apply.',data:{operation:'describe',adapter:'codex-memory@0.4.0',format:'amis.bundle',version:'0.4.0',read:['markdown','private_sqlite_snapshot'],write:[{route:'native',scopes:['global'],requires:'verified ad-hoc backend'},{route:'context',scopes:['project','global'],requires:'effective instruction chain'}],native_write_verified:false,write_coordination:'quiescent_required',unattended_writes:false}},
- scan:{title:'Snapshot inputs; account for everything.',text:'A stable scan session returns pages and explicit skipped-source diagnostics. Resume against the same captured inventory or restart when it changes. Coverage never means “the first 1,024 files.”',data:{operation:'scan',scan_id:'fixture-scan-1',cursor:null,result:{sources:[{locator:'memory/feedback.md',snapshot_ref:'<sha256 of exact bytes>'}],next_cursor:null,coverage:{visited:1,captured:1,skipped:0,complete:true}}}},
- normalize:{title:'Parse structure; keep meaning intact.',text:'Reuse identity from the source registry or an owned receipt. Keep unknown kinds and scope explicit. Incoming bytes never contain local publication approval; hold new candidates until the local review gate passes.',data:{operation:'normalize',snapshot_ref:'<sha256>',result:{record:{id:'<memory uuid>',revision:{id:'<revision uuid>',parents:[]},status:'active'},local_review:'pending',transformation:'parsed',semantic_rewrite:false}}},
- plan:{title:'Freeze the exact change for review.',text:'A local plan binds canonical revisions, scope mappings, adapter/configuration evidence and all output preconditions. It reports fidelity for every record field and existing loading budgets.',data:{operation:'plan',record:{memory_id:'805b3b19-1266-4254-a5cc-2c4eb30428ec',revision_id:'<uuid>',digest:'<record digest>'},expected_heads:[{memory_id:'<memory uuid>',revision_id:'<head uuid>',digest:'<head digest>'}],expires_at:'<bounded deadline>',target:{provider:'codex',profile:'example.codex.context.v1',binding_id:'<confirmed repository binding>'},mutations:[{resource_ref:'<binding-owned instruction resource>',before:{state:'present',sha256:'<current bytes hash>',snapshot_ref:'<retained base>'},after:{state:'present',sha256:'<reviewed output hash>',snapshot_ref:'<reviewed output>'},role:'context'}],approval:'separate local decision required for the sealed plan',blockers:[]}},
- apply:{title:'Journal, write, and retry safely.',text:'Persist intent before writes and check preconditions. Use the declared write coordination before per-file atomic replacement; an arbitrary external writer can still race an unlocked file. A changed user file causes a conflict, never blind overwrite.',data:{operation:'apply',plan_id:'<approved local plan>',idempotency_key:'<stable plan key>',result:{deliveries:[{provider:'codex',write_state:'complete',availability:'unknown',receipt_id:'<local receipt>'},{provider:'claude_code',write_state:'failed',availability:'unknown',retry:'same_plan'}],atomic_across_targets:false}}},
- verify:{title:'Report evidence at the level observed.',text:'Verify bytes, index reachability, consolidation and fresh-session loading separately. Topic availability, loaded content and model recall are different observations.',data:{operation:'verify',receipt_id:'<owned receipt>',result:{bytes_match:true,index_entry_loaded:true,topic_read:'not_observed',consolidation:'not_applicable',fresh_session:'not_tested',write_state:'complete',availability:'discoverable',model_recall:'not_claimed'}}}
-};
-function showOperation(key){const o=ops[key];document.querySelectorAll('[data-op]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.op===key));$('op-copy').innerHTML='<div class="eyebrow">adapter.'+key+'</div><h3>'+o.title+'</h3><p>'+o.text+'</p>';$('op-filename').textContent='adapter.'+key;$('op-code').textContent=JSON.stringify(o.data,null,2)}
-async function replay(){const token=++epoch;state.view='flow';state.running=true;state.stage=1;render();for(let step=2;step<=4;step++){await delay(330);if(token!==epoch)return;state.stage=step;render()}state.running=false;render()}
-const profileChoices={core:['Core','Records and portable bundles','Required: immutable identity, versioned semantics, scope, declared provenance and canonical integrity. No provider or database is built into the contract.','amis.core.v1'],links:['Links','Knowledge can cite other knowledge','Optional feature: explicit typed links to current heads or an exact revision. Links do not grant permission or affect task readiness. Unknown required link semantics hold publication.','amis.links.v1'],publication:['Publication','Plan before applying a projection','Optional profile: exact resource mutations, receiver-owned authorization, capability negotiation, concurrency protection and honest delivery receipts. Native formats live in adapter profiles.','amis.publication.v1'],sync:['Synchronization','Observe changes without losing history','Optional profile: scoped durable cursors, explicit withdrawal events, bounded retry, conflict preservation and crash recovery. A missing item in a partial scan never means deletion.','amis.sync.v1']};
-function showProfile(key){const p=profileChoices[key];document.querySelectorAll('[data-profile]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.profile===key));$('profile-preview').innerHTML='<div><span class="eyebrow">'+p[0]+'</span><h3>'+p[1]+'</h3><p>'+p[2]+'</p></div><pre>format: "amis.bundle"\nversion: "0.4.0"\ncapability: "'+p[3]+'"</pre>';}
-const stressCases={
- fork:{title:'Two machines can edit without colliding.',outcome:'Hold two heads for review',text:'A → B on one machine and A → C on another. B and C have unique revision UUIDs and reference A by ID and digest. A reviewed merge M references both. Wall-clock time never selects the winner.'},
- tamper:{title:'Changing scope invalidates the record digest.',outcome:'Rejected: integrity mismatch',text:'The demo changes only the repository scope on a copy. Its existing digest no longer matches. The scope, parents, source references and unknown fields are all covered.'},
- feature:{title:'Unknown required semantics stop publication.',outcome:'Archive only',text:'This bundle asks for an unsupported required feature. Preserve its bytes, but do not silently strip the feature and publish a partial interpretation.'},
- expiry:{title:'Expired knowledge stays in history.',outcome:'Held: validity interval ended',text:'A record with an expired interval is no longer eligible for new delivery. Renewal requires a reviewed revision. Existing projections need tracked removal or correction; history is not rewritten.'},
- crash:{title:'Partial delivery survives a restart.',outcome:'Retry the failed destination',text:'One harness already has the exact reviewed bytes. The other write failed. Recover from the persisted plan and journal, verify the successful output, and retry only the incomplete destination.'},
- race:{title:'A filesystem rename is not a universal compare-and-swap.',outcome:'Pause until coordinated',text:'An adapter without a versioned write API or a cooperative lock requires the target to be quiescent. Preflight hashes alone cannot eliminate an external writer racing the replacement. Unattended sync stays disabled for this route.'}
-};
-let stressEpoch=0;
-async function showStress(key){const n=++stressEpoch,c=stressCases[key];document.querySelectorAll('[data-stress]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.stress===key));let detail=c.text;
- if(key==='tamper'){const changed=clone(record());changed.scope={kind:'global',subject_ref:'another-user'};const matches=await integrityOK(changed);if(n!==stressEpoch)return;detail+=' Computed result: '+(matches?'MATCH (unexpected)':'MISMATCH')+'.'}
- $('stress-result').innerHTML='<span class="badge '+(key==='fork'||key==='crash'?'green':'amber')+'">'+c.outcome+'</span><h3>'+c.title+'</h3><p>'+detail+'</p>';
+function showProfile(key) {
+  const profile = profiles[key];
+  document.querySelectorAll('[data-profile]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.profile === key)));
+  $('profile-preview').innerHTML = '<div><span class="eyebrow">' + esc(profile[0]) + '</span><h3>' + esc(profile[1]) + '</h3><p>' + esc(profile[2]) + '</p></div><pre>format: "amis.bundle"\nversion: "0.4.0"\nfeature: "' + esc(profile[3]) + '"</pre>';
 }
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
- if(b.dataset.profile)showProfile(b.dataset.profile);
- if(b.dataset.stress)showStress(b.dataset.stress);
- if(b.dataset.view){state.view=b.dataset.view;render()}
- if(b.dataset.field){state.field=b.dataset.field;render()}
- if(b.dataset.round){state.round=b.dataset.round;render()}
- if(b.dataset.passport)showPassport(b.dataset.passport);
- if(b.dataset.design)renderDesign(b.dataset.design);
- if(b.dataset.op)showOperation(b.dataset.op);
- if(b.id==='reverse'){state.source=target();refresh()}
- if(b.id==='transform')replay();
- if(b.id==='show-full'){state.full=!state.full;showPassport(state.passport)}
- if(b.id==='theme')document.body.classList.toggle('dark');
- if(b.id==='reset'){state.source='claude';state.example='feedback';state.view='flow';state.field='body';$('example').value='feedback';refresh()}
+const cases = {
+  fork:['Concurrent revisions remain distinct.','Preserve both heads','Two edits reference the same parent by revision ID and digest. A reviewed merge references both heads; wall-clock time never selects a winner.'],
+  tamper:['Meaning is covered by integrity.','Integrity mismatch','Changing the scope without updating the record digest invalidates its integrity. A recomputed unsigned digest would still establish consistency only, not trust or permission.'],
+  feature:['Unknown requirements remain explicit.','Archive only','A reader that does not understand a required feature preserves the document without publishing a partial interpretation. Unknown optional fields remain part of the integrity-covered data.'],
+  withdrawal:['History does not silently resurrect.','Retain the withdrawal','A known withdrawal holds automatic publication for that identity. Restoration requires a separately reviewed revision that references the current heads.']
+};
+async function showCase(key) {
+  const epoch = ++stressEpoch, value = cases[key];
+  document.querySelectorAll('[data-stress]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.stress === key)));
+  let detail = value[2];
+  if (key === 'tamper') {
+    const changed = clone(record); changed.scope = {kind:'global',subject_ref:'another-owner'};
+    const valid = await integrityOK(changed);
+    if (epoch !== stressEpoch) return;
+    detail += ' Computed digest comparison: ' + (valid ? 'MATCH (unexpected)' : 'MISMATCH') + '.';
+  }
+  $('stress-result').innerHTML = '<span class="badge amber">' + esc(value[1]) + '</span><h3>' + esc(value[0]) + '</h3><p>' + esc(detail) + '</p>';
+}
+document.addEventListener('click', event => {
+  const button = event.target.closest('button'); if (!button) return;
+  if (button.dataset.passport) showGroup(button.dataset.passport);
+  if (button.dataset.profile) showProfile(button.dataset.profile);
+  if (button.dataset.stress) showCase(button.dataset.stress);
+  if (button.id === 'show-full') { full = !full; showGroup(selectedGroup); }
+  if (button.id === 'theme') document.body.classList.toggle('dark');
 });
-document.addEventListener('click',e=>{const line=e.target.closest('.line[data-field]');if(line){state.field=line.dataset.field;render()}});
-document.addEventListener('keydown',e=>{const line=e.target.closest('.line[data-field]');if(line&&['Enter',' '].includes(e.key)){e.preventDefault();state.field=line.dataset.field;render()}});
-document.addEventListener('change',e=>{if(e.target.id==='example'){state.example=e.target.value;refresh()}if(e.target.id==='route'){state.route=e.target.value;state.round='same';render()}});
-window.agentMemoryDemo={integrityOK,seal,canonical,getDocument:()=>clone(doc),getNativeOutput:()=>clone(nativeOutput()),getMapping:()=>mappingRows(),getState:()=>clone(state)};
-showProfile('core');showStress('fork');renderDesign('library');showOperation('describe');refresh();
+window.amisSpecDemo = {getDocument:() => clone(doc), canonical, seal, integrityOK};
+showGroup('identity'); showProfile('core'); showCase('fork');

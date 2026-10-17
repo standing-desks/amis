@@ -2,6 +2,12 @@
 
 Keep the specification independent of any application or provider. New providers implement profiles; they do not change the meaning of core fields.
 
+Native parsers, renderers, provider profiles, conversion fixtures and integration
+tests belong to consuming projects. This repository accepts specification text,
+schemas, portable examples, conformance vectors, reference validation tooling and
+documentation. Product interfaces and supported-harness roadmaps are maintained
+by the implementations that provide them.
+
 Propose changes with:
 
 1. The concrete interoperability problem and a before/after example.
