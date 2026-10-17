@@ -6,6 +6,8 @@
 
 **Version 0.4.0** · [Specification](SPEC.md) · [Visual guide](docs/index.html) · [Schemas](schemas/0.4.0/) · [Example bundle](examples/project-feedback.amis.json)
 
+**TWINE-77, in progress:** read the [simple explanation of memory consolidation](docs/memory-consolidation.html) and the [proposed contract changes](docs/proposals/twine-77.md). These are informative drafts. Version 0.4.0 and its published wire contract remain unchanged.
+
 ## Repository boundary
 
 This repository contains only the specification, schemas, portable examples and documentation, with a documentation build and documentation checks.

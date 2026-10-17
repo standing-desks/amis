@@ -41,7 +41,7 @@ fs.mkdirSync(artifacts, {recursive:true});
    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth+1),false,'guide overflow at '+width);
   }
   await page.screenshot({path:path.join(artifacts,'spec-guide-mobile.png')});
-  for (const file of ['index.html','spec.html','brand.html']) {
+  for (const file of ['index.html','spec.html','brand.html','memory-consolidation.html']) {
    await page.goto(pathToFileURL(path.join(docs,file)).href);
    await page.waitForFunction(() => Array.from(document.images).every(image => image.complete && image.naturalWidth > 0));
    for (const link of await page.locator('a[href]').evaluateAll(nodes => nodes.map(node => node.getAttribute('href')))) {

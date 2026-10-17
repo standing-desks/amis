@@ -6,6 +6,8 @@ AMIS is an independent specification for portable agent memory and interoperable
 
 The terms MUST, MUST NOT, SHOULD and MAY express the proposed conformance requirements.
 
+**Informative work in progress:** [TWINE-77](docs/proposals/twine-77.md) proposes a later contract revision, with a [plain-language explanation](docs/memory-consolidation.html). That draft is separate from this normative 0.4.0 specification; no version or wire requirements change in this pass.
+
 
 ## Independent core. Explicit receiver behavior.
 

@@ -2,6 +2,8 @@
 
 ## Updates
 
+- Start TWINE-77 with an informative contract proposal and an HTML explanation of the intended memory-consolidation flow. Keep the specification version, 0.4.0 schemas and published behavioral requirements unchanged while the redesign is drafted.
+
 - Complete the spec-only repository boundary: remove the Python validator, API and contract tests, validator fixtures, and executable canonicalization and hashing from the guide. Validators and other reference implementations belong to consuming projects.
 - Keep the documentation build and documentation-only checks, and remove validator dependencies and Make targets. AMIS 0.4.0 schemas, examples and behavioral requirements are unchanged.
 - Scope the repository to the specification, schemas, portable examples, conformance vectors and reference validation tooling. Consuming projects own native converters, profiles and integration tests.

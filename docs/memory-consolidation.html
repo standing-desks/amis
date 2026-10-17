@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="A simple explanation of the proposed AMIS memory-consolidation flow: collect, propose, review, share, check and undo.">
+  <title>How memory consolidation would work · AMIS</title>
+  <link rel="icon" type="image/svg+xml" href="assets/brand/amis-mark.svg">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f5f4ee;
+      --surface: #fffef9;
+      --ink: #24332b;
+      --muted: #626e64;
+      --line: #d9dfd3;
+      --green: #2d6544;
+      --tint: #e8efdf;
+      --soft: #eeeee5;
+      --amber: #86531e;
+      --amber-tint: #f5ebd9;
+      --blue: #3d5d7d;
+      --blue-tint: #e7edf1;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: var(--green); text-underline-offset: 4px; }
+    button { font: inherit; cursor: pointer; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button:focus-visible, a:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid var(--green); outline-offset: 5px; }
+    button:disabled { opacity: .45; cursor: default; }
+    [hidden] { display: none !important; }
+    .wrap { width: min(1120px, calc(100% - 64px)); margin: 0 auto; }
+    .skip { position: absolute; left: 16px; top: -80px; background: var(--surface); padding: 10px 16px; z-index: 4; }
+    .skip:focus { top: 12px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--line); }
+    .brand { display: flex; gap: 11px; align-items: center; font-size: 23px; letter-spacing: -.7px; font-weight: 700; text-decoration: none; color: var(--ink); }
+    .brand img { width: 35px; height: 35px; }
+    .header-meta { font-size: 11px; color: var(--muted); letter-spacing: .06em; text-align: right; }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(38px, 5.5vw, 64px); font-weight: 600; letter-spacing: -.045em; line-height: 1.09; margin: 17px 0 23px; }
+    h2 { font-size: 28px; font-weight: 600; line-height: 1.25; letter-spacing: -.7px; }
+    h3 { font-size: 17px; line-height: 1.4; font-weight: 650; }
+    p + p { margin-top: 12px; }
+    .hero { display: grid; grid-template-columns: 1.5fr 1fr; gap: 65px; padding: 54px 0 35px; align-items: end; }
+    .lede { color: var(--muted); font-size: 18px; max-width: 650px; }
+    .hero-note { padding: 22px 0 22px 25px; border-left: 2px solid var(--green); font-size: 14px; color: var(--muted); }
+    .hero-note strong { display: block; color: var(--ink); font-size: 16px; margin-bottom: 8px; }
+    .draft { display: flex; align-items: baseline; gap: 12px; background: var(--soft); border-radius: 6px; padding: 12px 16px; font-size: 12px; color: var(--muted); }
+    .draft strong { color: var(--ink); white-space: nowrap; }
+    .flow { display: grid; grid-template-columns: 1fr 34px 1.25fr 34px 1fr; gap: 10px; margin: 31px 0 45px; align-items: center; }
+    .flow-box { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 19px 21px; }
+    .flow-box.center { background: var(--tint); border-color: #a7b996; }
+    .flow-box .label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 5px; }
+    .flow-box strong { font-size: 16px; display: block; }
+    .flow-box small { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .flow-arrow { text-align: center; color: var(--green); font-size: 25px; }
+    .section-title { display: flex; align-items: end; justify-content: space-between; gap: 28px; margin-bottom: 19px; }
+    .section-title .eyebrow { margin-bottom: 9px; }
+    .section-title > p { font-size: 13px; color: var(--muted); max-width: 320px; }
+    .walkthrough { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
+    .step { display: flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-bottom: 3px solid transparent; padding: 17px 8px 14px; background: transparent; color: var(--muted); font-size: 13px; }
+    .step .number { font-size: 10px; opacity: .75; }
+    .step[aria-selected="true"] { color: var(--green); background: var(--tint); border-bottom-color: var(--green); font-weight: 650; }
+    .stage { padding: 30px; }
+    .stage + .stage { border-top: 1px solid var(--line); }
+    .stage-head { display: grid; grid-template-columns: 1.1fr 1fr; gap: 36px; align-items: start; margin-bottom: 23px; }
+    .stage-head h3 { font-size: 24px; line-height: 1.25; letter-spacing: -.55px; margin: 8px 0 0; }
+    .stage-head > p { color: var(--muted); font-size: 14px; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { padding: 21px; background: var(--soft); border-radius: 7px; }
+    .card .source { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; font-size: 12px; font-weight: 650; }
+    .card .source span:last-child { font-size: 10px; font-weight: 500; color: var(--muted); }
+    blockquote { margin: 0; font-size: 17px; line-height: 1.65; }
+    .footnote { font-size: 12px; color: var(--muted); margin-top: 16px; }
+    .rule { border-left: 3px solid var(--green); margin-top: 22px; padding: 2px 0 2px 15px; font-size: 13px; color: var(--muted); }
+    .rule strong { color: var(--ink); }
+    .memory { border: 1px solid #a7b996; background: var(--tint); border-radius: 8px; padding: 24px; }
+    .memory .label { color: var(--green); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 11px; }
+    .memory blockquote { max-width: 740px; font-size: 20px; }
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .pill { border: 1px solid var(--line); border-radius: 4px; padding: 3px 8px; font-size: 11px; color: var(--muted); background: var(--surface); }
+    .review-row { display: grid; grid-template-columns: 36px 1fr; gap: 13px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+    .review-row:first-child { padding-top: 0; }
+    .review-row:last-child { border: 0; padding-bottom: 0; }
+    .review-number { width: 30px; height: 30px; border-radius: 50%; background: var(--tint); color: var(--green); display: grid; place-items: center; font-size: 12px; }
+    .review-row strong { font-size: 15px; display: block; }
+    .review-row p { color: var(--muted); font-size: 13px; margin-top: 3px; }
+    .target { border: 1px solid var(--line); border-radius: 8px; padding: 21px; }
+    .target h4 { margin: 0 0 12px; font-size: 16px; }
+    .target p { font-size: 13px; color: var(--muted); margin-top: 10px; }
+    .status { font-size: 11px; font-weight: 650; display: inline-block; border-radius: 4px; padding: 4px 8px; background: var(--tint); color: var(--green); }
+    .status.wait { background: var(--amber-tint); color: var(--amber); }
+    .status.note { background: var(--blue-tint); color: var(--blue); }
+    .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; }
+    .level { border-top: 3px solid var(--green); padding: 17px; background: var(--soft); border-radius: 0 0 6px 6px; }
+    .level.wait { border-color: var(--amber); }
+    .level strong { display: block; font-size: 16px; margin-bottom: 8px; }
+    .level p { font-size: 13px; color: var(--muted); }
+    .undo-list { display: grid; gap: 12px; margin: 0; padding-left: 22px; font-size: 15px; }
+    .undo-list li { padding-left: 5px; }
+    .undo-list span { display: block; color: var(--muted); font-size: 13px; }
+    .controls { border-top: 1px solid var(--line); padding: 16px 25px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .counter { color: var(--muted); font-size: 12px; }
+    .control-buttons { display: flex; gap: 8px; }
+    .control { border: 1px solid var(--line); padding: 8px 14px; border-radius: 5px; color: var(--ink); background: var(--surface); font-size: 12px; }
+    .control.next { border-color: var(--green); background: var(--green); color: var(--surface); }
+    .below { margin-top: 43px; }
+    .choices { display: grid; grid-template-columns: repeat(3, 1fr); gap: 23px; margin-top: 19px; }
+    .choice { border-top: 1px solid var(--line); padding-top: 17px; }
+    .choice .count { color: var(--green); font-size: 11px; margin-bottom: 8px; }
+    .choice p { font-size: 13px; color: var(--muted); margin-top: 8px; }
+    .cases { margin-top: 19px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    details { border: 1px solid var(--line); border-radius: 7px; background: var(--surface); padding: 16px 19px; align-self: start; }
+    summary { font-size: 14px; font-weight: 600; cursor: pointer; }
+    details p { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .ownership { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 25px 28px; background: var(--soft); border-radius: 8px; margin-top: 42px; }
+    .ownership h3 { margin-bottom: 7px; }
+    .ownership p { font-size: 13px; color: var(--muted); }
+    .release { margin-top: 31px; font-size: 13px; color: var(--muted); }
+    .release strong { color: var(--ink); }
+    footer { display: flex; justify-content: space-between; gap: 22px; margin-top: 30px; padding: 23px 0 33px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+    footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    @media (prefers-color-scheme: dark) {
+      :root { --paper: #18211b; --surface: #202c23; --ink: #e5ecdf; --muted: #aab8a5; --line: #3c4c3e; --green: #b0d68a; --tint: #2b3e2b; --soft: #233026; --amber: #f0c58c; --amber-tint: #433521; --blue: #a9c9e2; --blue-tint: #293c4b; }
+      .flow-box.center, .memory { border-color: #5c7952; }
+    }
+    @media (max-width: 800px) {
+      .hero { grid-template-columns: 1fr; gap: 25px; padding-top: 35px; }
+      .hero-note { padding-top: 0; padding-bottom: 0; }
+      .flow { grid-template-columns: 1fr 24px 1fr 24px 1fr; gap: 6px; }
+      .flow-box { padding: 15px; }
+      .flow-box strong { font-size: 14px; }
+      .stage-head { grid-template-columns: 1fr; gap: 14px; }
+      .section-title { display: block; }
+      .section-title > p { margin-top: 10px; max-width: none; }
+      .stage { padding: 24px; }
+    }
+    @media (max-width: 560px) {
+      .wrap { width: calc(100% - 32px); }
+      header { padding: 20px 0; }
+      .header-meta { font-size: 10px; max-width: 160px; }
+      h1 { font-size: 42px; }
+      h2 { font-size: 25px; }
+      .lede { font-size: 16px; }
+      .draft { display: block; }
+      .draft strong { display: block; margin-bottom: 4px; }
+      .flow { grid-template-columns: 1fr; gap: 6px; margin: 23px 0 31px; }
+      .flow-box { padding: 14px 18px; }
+      .flow-arrow { transform: rotate(90deg); font-size: 22px; line-height: 1; }
+      .steps { grid-template-columns: repeat(3, 1fr); }
+      .step { padding: 13px 6px 10px; }
+      .stage { padding: 21px 18px; }
+      .stage-head h3 { font-size: 23px; }
+      .cards, .levels, .choices, .cases, .ownership { grid-template-columns: 1fr; }
+      .card, .target { padding: 18px; }
+      .memory { padding: 19px; }
+      .memory blockquote { font-size: 18px; }
+      .controls { padding: 14px 18px; flex-wrap: wrap; }
+      .control-buttons { margin-left: auto; }
+      .choices { gap: 18px; }
+      .ownership { gap: 22px; padding: 22px; }
+      footer { flex-direction: column; gap: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media print {
+      :root { --paper: white; --surface: white; --ink: #17251d; --muted: #49554c; --line: #c9d0c4; --green: #285e3d; --tint: #edf2e7; --soft: #f5f5ef; }
+      .wrap { width: 100%; }
+      .steps, .controls, .skip { display: none !important; }
+      [data-stage][hidden] { display: block !important; }
+      .stage { break-inside: avoid; }
+      .cases { display: block; }
+      details { margin-bottom: 12px; }
+      details > p { display: block !important; }
+      details::details-content { content-visibility: visible; }
+      .hero { padding-top: 25px; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to explanation</a>
+<div class="wrap">
+  <header>
+    <a class="brand" href="index.html"><img src="assets/brand/amis-mark.svg" alt="">AMIS</a>
+    <div class="header-meta">TWINE-77 · WORKING PROPOSAL<br>17 OCTOBER 2026</div>
+  </header>
+  <main id="main">
+    <section class="hero" aria-labelledby="title">
+      <div>
+        <div class="eyebrow">The idea, explained simply</div>
+        <h1 id="title">How memory<br>consolidation<br>would work.</h1>
+        <p class="lede">Your app keeps a reviewed memory library. Agents contribute useful knowledge and receive the parts that belong in their work.</p>
+      </div>
+      <aside class="hero-note">
+        <strong>AMIS is the shared specification.</strong>
+        An app such as Twine would do the collecting, reviewing and sharing. Its converters would connect Codex, Claude Code and other supported tools to the AMIS format.
+      </aside>
+    </section>
+    <div class="draft"><strong>Proposed experience</strong><span>This explains the intended flow using fictional notes. AMIS remains at version 0.4.0. The background library and publication flow shown here are design work.</span></div>
+
+    <section class="flow" aria-label="Memory flows from native sources into an application-owned library and then into compatible destinations">
+      <div class="flow-box"><span class="label">Collect from</span><strong>Codex · Claude Code</strong><small>The memories you allow</small></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-box center"><span class="label">Your app owns</span><strong>A reviewed memory library</strong><small>AMIS records + original evidence</small></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-box"><span class="label">Share with</span><strong>Compatible destinations</strong><small>Only within the approved scope</small></div>
+    </section>
+
+    <section aria-labelledby="walkthrough-title">
+      <div class="section-title">
+        <div><div class="eyebrow">Follow one memory</div><h2 id="walkthrough-title">From two notes to one useful memory.</h2></div>
+        <p>Example project: Atlas. Both sources have been confirmed to apply to this project.</p>
+      </div>
+      <div class="walkthrough">
+        <div class="steps" id="steps" role="tablist" aria-label="Explanation stages" hidden>
+          <button class="step" id="tab-collect" role="tab" aria-controls="stage-collect" aria-selected="true" tabindex="0"><span class="number">01</span>Collect</button>
+          <button class="step" id="tab-propose" role="tab" aria-controls="stage-propose" aria-selected="false" tabindex="-1"><span class="number">02</span>Propose</button>
+          <button class="step" id="tab-review" role="tab" aria-controls="stage-review" aria-selected="false" tabindex="-1"><span class="number">03</span>Review</button>
+          <button class="step" id="tab-share" role="tab" aria-controls="stage-share" aria-selected="false" tabindex="-1"><span class="number">04</span>Share</button>
+          <button class="step" id="tab-check" role="tab" aria-controls="stage-check" aria-selected="false" tabindex="-1"><span class="number">05</span>Check</button>
+          <button class="step" id="tab-undo" role="tab" aria-controls="stage-undo" aria-selected="false" tabindex="-1"><span class="number">06</span>Undo</button>
+        </div>
+
+        <article class="stage" id="stage-collect" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">01 · Collect</div><h3>Keep the originals and where they came from.</h3></div><p>The app takes a snapshot of each permitted memory. It records its source, project and history before preparing anything new.</p></div>
+          <div class="cards">
+            <div class="card"><div class="source"><span>From Codex</span><span>Atlas project</span></div><blockquote>“For Atlas, run focused checks before a broad test suite.”</blockquote></div>
+            <div class="card"><div class="source"><span>From Claude Code</span><span>Atlas project</span></div><blockquote>“Keep Atlas changes small, and explain what you verified.”</blockquote></div>
+          </div>
+          <p class="footnote">These notes are illustrative. A folder name alone would not prove their scope.</p>
+          <p class="rule"><strong>Collection can happen in the background.</strong> Only enabled sources are read. Re-reading an unchanged source does not create another copy of the memory.</p>
+        </article>
+
+        <article class="stage" id="stage-propose" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">02 · Propose</div><h3>Prepare a useful combined version.</h3></div><p>A separate consolidation step can suggest a clearer memory using those exact notes. The original wording and evidence stay available for review.</p></div>
+          <div class="memory"><div class="label">Proposed memory · Awaiting review</div><blockquote>For Atlas, keep changes small. Run focused checks before a broad test suite, and explain what you verified.</blockquote><div class="pills"><span class="pill">Scope: Atlas only</span><span class="pill">Based on 2 original notes</span><span class="pill">New memory, linked to its inputs</span></div></div>
+          <p class="rule"><strong>Combining meaning is a proposal.</strong> Contradictory notes stay visible. The app does not choose a winner just because one note is newer or sounds more confident.</p>
+        </article>
+
+        <article class="stage" id="stage-review" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">03 · Review</div><h3>Approve the meaning, then the destination changes.</h3></div><p>You can keep the original notes, edit the proposal, accept it or reject it. Accepting it into the library is separate from sharing it with an agent.</p></div>
+          <div>
+            <div class="review-row"><span class="review-number">1</span><div><strong>Review the claim and its evidence.</strong><p>See both source notes beside the proposal. Confirm that the wording and Atlas-only scope are right.</p></div></div>
+            <div class="review-row"><span class="review-number">2</span><div><strong>Choose the destinations and inspect the exact changes.</strong><p>See the files or resources that would change, what would be preserved, and anything the destination cannot represent.</p></div></div>
+            <div class="review-row"><span class="review-number">3</span><div><strong>Approve that plan.</strong><p>A changed destination, permission, source decision or scope requires a fresh check. The original approval cannot authorize different changes.</p></div></div>
+          </div>
+          <p class="rule"><strong>Your app owns permission.</strong> A memory's text, a model response or an imported “approved” label cannot grant write access.</p>
+        </article>
+
+        <article class="stage" id="stage-share" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">04 · Share</div><h3>Use each destination's own converter and rules.</h3></div><p>In this example, the app has tested project-context routes for both tools. It preserves Atlas scope and applies each approved change when safe coordination is available.</p></div>
+          <div class="cards">
+            <div class="target"><h4>Codex · Atlas context</h4><span class="status">Written and checked</span><p>The approved content was saved through this route. Existing unrelated content was preserved.</p></div>
+            <div class="target"><h4>Claude Code · Atlas context</h4><span class="status wait">Waiting for safe write</span><p>Another writer may be using a shared resource. The change stays staged until the app can coordinate access.</p></div>
+          </div>
+          <p class="footnote">Illustrative outcomes, not a claim that these live integrations are implemented or certified. Context publication is shown explicitly; native memory ingestion is a separate route.</p>
+          <p class="rule"><strong>One target can wait while another succeeds.</strong> A retry keeps successful work. If a route would widen the memory's scope, the app holds it for review.</p>
+        </article>
+
+        <article class="stage" id="stage-check" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">05 · Check</div><h3>Show what the app can actually verify.</h3></div><p>A saved file is the first step. The app keeps delivery evidence per destination and makes gaps visible.</p></div>
+          <div class="levels">
+            <div class="level"><strong>Written</strong><p>The exact planned content is present in the destination.</p></div>
+            <div class="level"><strong>Discoverable</strong><p>The destination's configured loading route can find the published memory.</p></div>
+            <div class="level wait"><strong>Loaded</strong><p>Observed in a particular agent context. Until that is checked, loading remains unverified.</p></div>
+          </div>
+          <p class="rule"><strong>Evidence has a context and a lifetime.</strong> Changes to the file, configuration or agent version require a fresh check. Loading does not guarantee future recall or compliance.</p>
+        </article>
+
+        <article class="stage" id="stage-undo" data-stage>
+          <div class="stage-head"><div><div class="eyebrow">06 · Undo</div><h3>Reverse owned changes while protecting newer work.</h3></div><p>Imagine both destinations later received the memory, then you manually edited one copy. Undo needs to account for that newer edit.</p></div>
+          <ol class="undo-list">
+            <li>Stop this memory from being republished.<span>Cancel waiting changes and hold work derived from the undone memory for review.</span></li>
+            <li>Prepare corrections for the app's own changes.<span>Keep the original source notes and history. Show which destinations can be corrected safely.</span></li>
+            <li>Preserve your manual edit.<span>A changed destination is a conflict to resolve. Undo does not restore an old whole-file snapshot over it.</span></li>
+          </ol>
+          <p class="rule"><strong>Undo has honest limits.</strong> The app shows when recovery data has expired. Already-running contexts or external copies may still contain the old memory.</p>
+        </article>
+
+        <div class="controls" id="controls" hidden>
+          <p class="counter" id="counter" aria-live="polite" aria-atomic="true">Step 1 of 6 · Collect</p>
+          <div class="control-buttons"><button class="control" id="previous" type="button" disabled>Previous</button><button class="control next" id="next" type="button">Next: Propose →</button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="below" aria-labelledby="choices-title">
+      <div class="eyebrow">You stay in control</div>
+      <h2 id="choices-title" style="margin-top:9px">Three choices to make at setup.</h2>
+      <div class="choices">
+        <div class="choice"><div class="count">01 / SOURCES &amp; SCOPE</div><h3>What may be collected?</h3><p>Choose allowed sources and confirm project boundaries. Global preferences and project knowledge keep their separate scope.</p></div>
+        <div class="choice"><div class="count">02 / CONSOLIDATION</div><h3>How are proposals prepared?</h3><p>Choose deterministic rules or a local or hosted model. A hosted model receives the selected memory content; that choice is explicit.</p></div>
+        <div class="choice"><div class="count">03 / PUBLICATION</div><h3>What can happen automatically?</h3><p>The initial flow uses explicit approval for native changes. Later, a narrowly configured local policy could approve routine changes, with recorded decisions and exception review.</p></div>
+      </div>
+    </section>
+
+    <section class="below" aria-labelledby="cases-title">
+      <div class="eyebrow">When things change</div>
+      <h2 id="cases-title" style="margin-top:9px">The important edge cases.</h2>
+      <div class="cases">
+        <details><summary>Two agents remember different answers.</summary><p>Keep both claims and their evidence. Ask for a resolution or narrower scopes. Timestamp order and repeated wording do not establish which answer is correct.</p></details>
+        <details><summary>An original memory is withdrawn.</summary><p>Hold dependent proposals and publication, even if the combined memory has a new identity. Track corrections for copies already published. Unrelated knowledge remains available.</p></details>
+        <details><summary>The app closes halfway through a change.</summary><p>On reopening, reconcile each saved step with the actual destination. Preserve successful work, resume valid pending work, and surface conflicts. An interrupted operation is never assumed to have rolled back.</p></details>
+        <details><summary>An agent reads back a shared copy.</summary><p>An unchanged copy with the app's own delivery record creates no new memory or extra evidence. A native edit becomes something to reconcile against the original publication.</p></details>
+      </div>
+    </section>
+
+    <aside class="ownership" aria-label="Specification and application responsibilities">
+      <div><h3>AMIS defines the contract.</h3><p>Identity, scope, history, evidence, compatibility and delivery rules. The repository holds the spec, schemas, examples and documentation.</p></div>
+      <div><h3>Each app owns its implementation.</h3><p>Twine and other consumers own their memory library, converters, validators, approvals, background work, recovery and native integration tests.</p></div>
+    </aside>
+    <p class="release"><strong>What TWINE-77 is doing now:</strong> specifying the rules behind this experience, including feature requirements, derived-memory withdrawal, shared-resource coordination and delivery evidence. The technical proposal is a draft alongside the current 0.4.0 contract.</p>
+  </main>
+  <footer><span>Local explanation · Fictional data · No agent or model calls</span><nav aria-label="Related documentation"><a href="proposals/twine-77.md">Technical proposal</a><a href="spec.html">Current specification</a><a href="https://linear.app/twine-dev/issue/TWINE-77">TWINE-77</a></nav></footer>
+</div>
+<script>
+  (() => {
+    const tabs = Array.from(document.querySelectorAll('.step'));
+    const panels = Array.from(document.querySelectorAll('[data-stage]'));
+    const names = ['Collect', 'Propose', 'Review', 'Share', 'Check', 'Undo'];
+    const previous = document.getElementById('previous');
+    const next = document.getElementById('next');
+    let selected = 0;
+    function show(index, focusTab = false) {
+      selected = index;
+      tabs.forEach((tab, i) => {
+        tab.setAttribute('aria-selected', String(i === index));
+        tab.tabIndex = i === index ? 0 : -1;
+        panels[i].hidden = i !== index;
+        panels[i].setAttribute('role', 'tabpanel');
+        panels[i].setAttribute('aria-labelledby', tab.id);
+        panels[i].tabIndex = 0;
+      });
+      previous.disabled = index === 0;
+      next.textContent = index === tabs.length - 1 ? 'Back to the start ↺' : 'Next: ' + names[index + 1] + ' →';
+      document.getElementById('counter').textContent = 'Step ' + (index + 1) + ' of ' + tabs.length + ' · ' + names[index];
+      if (focusTab) tabs[index].focus();
+    }
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => show(i));
+      tab.addEventListener('keydown', event => {
+        let target;
+        if (event.key === 'ArrowRight') target = (i + 1) % tabs.length;
+        else if (event.key === 'ArrowLeft') target = (i - 1 + tabs.length) % tabs.length;
+        else if (event.key === 'Home') target = 0;
+        else if (event.key === 'End') target = tabs.length - 1;
+        else return;
+        event.preventDefault();
+        show(target, true);
+      });
+    });
+    previous.addEventListener('click', () => show(Math.max(0, selected - 1)));
+    next.addEventListener('click', () => show((selected + 1) % tabs.length));
+    document.getElementById('steps').hidden = false;
+    document.getElementById('controls').hidden = false;
+    show(0);
+  })();
+</script>
+</body>
+</html>
